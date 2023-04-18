@@ -5,9 +5,21 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+
 
 var app = express();
+let crypto = require('crypto');
+
+// Express-Validator
+const {body, validationResult} = require('express-validator');
+app.set('validator', {body, validationResult})
+
+
+// MongoDB
+const { MongoClient } = require('mongodb')
+const url = "mongodb://localhost:27017/"
+app.set('connectionStrings', url)
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,8 +31,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const usersRepository = require("./repositories/usersRepository.js");
+usersRepository.init(app, MongoClient);
+require("./routes/users.js")(app, usersRepository);
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
+
+app.set('clave','abcdefg');
+app.set('crypto',crypto);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
