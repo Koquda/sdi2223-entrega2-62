@@ -2,13 +2,6 @@ module.exports = function (app, usersRepository) {
   const validator = app.get('validator')
   const moment = app.get('moment')
 
-  app.get('/users', function (req, res) {
-    res.send('lista de usuarios');
-  })
-  app.get('/users/signup', function (req, res) {
-    res.render("signup.twig");
-  })
-
   const passwordMatches = (value, { req }) => {
     if (value !== req.body.confirmPassword) {
       throw new Error('Passwords do not match');
@@ -41,7 +34,15 @@ module.exports = function (app, usersRepository) {
     return `${day}-${month}-${year}`
   }
 
-
+  // Lists users TODO
+  app.get('/users', function (req, res) {
+    res.send('lista de usuarios');
+  })
+  // Get for signup
+  app.get('/users/signup', function (req, res) {
+    res.render("signup.twig");
+  })
+  // Post for signup
   app.post('/users/signup', [
     validator.body('password').notEmpty().withMessage('Password is required'),
     validator.body('confirmPassword').notEmpty().withMessage('Confirm password is required'),
@@ -102,4 +103,37 @@ module.exports = function (app, usersRepository) {
           "&messageType=alert-danger ");
     })
   });
+  // Get for login
+  app.get('/users/login', function (req, res) {
+    res.render("login.twig")
+  })
+  // Post for login
+  app.post('/users/login', function (req, res) {
+    let securePassword = app.get("crypto").createHmac('sha256', app.get('clave')).update(req.body.password).digest('hex')
+    let filter = {
+      email: req.body.email,
+      password: securePassword
+    }
+    usersRepository.findUser(filter, {}).then(user => {
+      if (user == null) {
+        req.session.user = null;
+        res.redirect("/users/login" +
+            "?message=Email o password incorrecto"+
+            "&messageType=alert-danger ");
+      } else {
+        req.session.user = user.email;
+        if (user.role === "admin"){
+          res.redirect("/users")
+        } else {
+          res.redirect("/users/listMyOffers")
+        }
+      }
+    }).catch(error => {
+      req.session.user = null;
+      res.redirect("/users/login" +
+          "?message=Se ha producido un error al buscar el usuario"+
+          "&messageType=alert-danger ");
+    })
+  })
+
 }

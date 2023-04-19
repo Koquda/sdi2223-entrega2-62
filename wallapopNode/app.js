@@ -10,6 +10,15 @@ var indexRouter = require('./routes/index');
 var app = express();
 let crypto = require('crypto');
 
+// Espress-session
+let expressSession = require('express-session');
+app.use(expressSession({
+  secret: 'abcdefg',
+  resave: true,
+  saveUninitialized: true
+}));
+
+
 // Express-Validator
 const {body, validationResult} = require('express-validator');
 app.set('validator', {body, validationResult})
