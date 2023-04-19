@@ -122,10 +122,15 @@ module.exports = function (app, usersRepository) {
             "&messageType=alert-danger ");
       } else {
         req.session.user = user.email;
+
+        req.session.wallet = user.wallet;
+
+        req.session.save();
+
         if (user.role === "admin"){
           res.redirect("/users")
         } else {
-          res.redirect("/users/listMyOffers")
+          res.redirect("/users/listMyOffers");
         }
       }
     }).catch(error => {
@@ -135,5 +140,11 @@ module.exports = function (app, usersRepository) {
           "&messageType=alert-danger ");
     })
   })
+
+  app.get("/users/listMyOffers",function(req,res){
+    res.render("index.twig",{wallet:req.session.wallet});
+  })
+
+
 
 }

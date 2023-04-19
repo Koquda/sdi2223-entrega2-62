@@ -4,7 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
 
 
 var app = express();
@@ -17,6 +16,11 @@ app.use(expressSession({
   resave: true,
   saveUninitialized: true
 }));
+
+app.use(function(req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
 
 
 // Express-Validator
@@ -45,16 +49,22 @@ const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
 
+let indexRouter = require('./routes/index.js');
 app.use('/', indexRouter);
 
 
 app.set('clave','abcdefg');
 app.set('crypto',crypto);
 
+
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function(err, req, res, next) {
