@@ -13,7 +13,8 @@ let crypto = require('crypto');
 // Express-Validator
 const {body, validationResult} = require('express-validator');
 app.set('validator', {body, validationResult})
-
+const moment = require('moment');
+app.set('moment', moment)
 
 // MongoDB
 const { MongoClient } = require('mongodb')

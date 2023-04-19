@@ -32,9 +32,9 @@
     <div class="form-group">
       <label class="control-label col-sm-2" for="birthdate">Birth Date:</label>
       <div class="col-sm-10">
-        {% set today = date() %}
+        {% set today = "now"|date("d-m-Y") %}
         <input id="birthdate" type="date" class="form-control" name="birthdate"
-               value="{{ today|date('Y-m-d') }}" max="{{ today|date('Y-m-d') }}"
+               value="{{ today }}" max="{{ today }}"
                min="1900-01-01" required="true" />
       </div>
     </div>
