@@ -17,6 +17,18 @@ module.exports = {
             throw (error);
         }
     },
+    findUsers: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'users';
+            const usersCollection = database.collection(collectionName);
+            const users = await usersCollection.find(filter, options).toArray();
+            return users;
+        } catch (error) {
+            throw (error);
+        }
+    },
     insertUser: async function (user) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
