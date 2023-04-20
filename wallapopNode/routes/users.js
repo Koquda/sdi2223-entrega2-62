@@ -145,6 +145,12 @@ module.exports = function (app, usersRepository) {
     res.render("index.twig",{wallet:req.session.wallet});
   })
 
+  app.get('/users/logout', function (req, res) {
+    req.session.user = null;
+    res.redirect("/users/login");
+  })
+
+
 
 
 }
