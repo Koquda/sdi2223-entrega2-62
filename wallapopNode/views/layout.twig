@@ -34,14 +34,13 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
-
-
         </ul>
-      <ul class="nav navbar-nav navbar-right">
-	    <li><a href="/users/signup"><span class="glyphicon glyphicon-user"></span> Registrate</a></li>
-        <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Identifícate</a></li>
-
-      </ul>
+      {% if wallet %}
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/users/signup"><span class="glyphicon glyphicon-user"></span> Registrate</a></li>
+          <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Identifícate</a></li>
+        </ul>
+      {% endif %}
     </div>
   </div>
 </nav>
