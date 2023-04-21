@@ -17,10 +17,7 @@ app.use(expressSession({
   saveUninitialized: true
 }));
 
-app.use(function(req, res, next) {
-  res.locals.session = req.session;
-  next();
-});
+
 
 
 // Express-Validator
@@ -47,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require("./routes/users.js")(app, usersRepository);
+require('./routes/users.js')(app, usersRepository);
 
 let indexRouter = require('./routes/index.js');
 app.use('/', indexRouter);

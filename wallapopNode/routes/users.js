@@ -40,7 +40,7 @@ module.exports = function (app, usersRepository) {
   })
   // Get for signup
   app.get('/users/signup', function (req, res) {
-    res.render("signup.twig");
+    res.render("signup.twig",{session:req.session});
   })
   // Post for signup
   app.post('/users/signup', [
@@ -105,7 +105,7 @@ module.exports = function (app, usersRepository) {
   });
   // Get for login
   app.get('/users/login', function (req, res) {
-    res.render("login.twig")
+    res.render("login.twig",{session:req.session})
   })
   // Post for login
   app.post('/users/login', function (req, res) {
@@ -125,7 +125,6 @@ module.exports = function (app, usersRepository) {
 
         req.session.wallet = user.wallet;
 
-        req.session.save();
 
         if (user.role === "admin"){
           res.redirect("/users")
@@ -142,7 +141,7 @@ module.exports = function (app, usersRepository) {
   })
 
   app.get("/users/listMyOffers",function(req,res){
-    res.render("index.twig",{wallet:req.session.wallet});
+    res.render("index.twig",{session:req.session});
   })
 
   app.get('/users/logout', function (req, res) {

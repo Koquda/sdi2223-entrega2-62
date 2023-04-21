@@ -1,7 +1,7 @@
 module.exports = function(app){
 
-  app.get('/', function(req, res) {
-    res.render('index.twig');
+  app.get("/", function(req, res) {
+    res.render("index.twig",{session:req.session});
   });
 
 }

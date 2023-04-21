@@ -25,8 +25,8 @@
 
 
 
-      {% if wallet %}
-        <li><a href="#"><span class="glyphicon glyphicon-credit-card"></span> Wallet: {{ wallet }}</a></li>
+      {% if session.wallet %}
+        <li><a href="#"><span class="glyphicon glyphicon-credit-card"></span> Wallet: {{ session.wallet }}</a></li>
       {% endif %}
 
 
@@ -35,12 +35,17 @@
     <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
         </ul>
-      {% if wallet %}
+
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="/users/signup"><span class="glyphicon glyphicon-user"></span> Registrate</a></li>
-          <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Identifícate</a></li>
+            {% if session.user %}
+                <li><a href="/users/logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+            {% else %}
+                <li><a href="/users/signup"><span class="glyphicon glyphicon-user"></span> Signup</a></li>
+                <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            {% endif %}
+
         </ul>
-      {% endif %}
+
     </div>
   </div>
 </nav>
