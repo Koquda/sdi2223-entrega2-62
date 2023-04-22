@@ -40,5 +40,17 @@ module.exports = {
         } catch (error) {
             throw (error);
         }
+    },
+    deleteUser: async function (filter) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'users';
+            const usersCollection = database.collection(collectionName);
+            const result = await usersCollection.deleteOne(filter);
+            return result.deletedCount;
+        } catch (error) {
+            throw (error);
+        }
     }
 };
