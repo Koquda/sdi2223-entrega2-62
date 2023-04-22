@@ -7,6 +7,9 @@ var logger = require('morgan');
 
 
 var app = express();
+let rest = require('request');
+app.set('rest', rest);
+
 let crypto = require('crypto');
 
 // Espress-session
@@ -42,26 +45,31 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const userSessionRouter = require('./routes/userSessionRouter');
+app.use("/offers/add",userSessionRouter);
+app.use("/publications",userSessionRouter);
+app.use("/offers/buy",userSessionRouter);
+app.use("/purchases",userSessionRouter);
+app.use("/shop/",userSessionRouter);
+
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require('./routes/users.js')(app, usersRepository);
 
+let offersRepository = require("./repositories/offersRepository.js");
+offersRepository.init(app, MongoClient);
+require("./routes/offers.js")(app, offersRepository);
+
 let indexRouter = require('./routes/index.js');
 app.use('/', indexRouter);
 
-
 app.set('clave','abcdefg');
 app.set('crypto',crypto);
-
-
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
-
-
 
 // error handler
 app.use(function(err, req, res, next) {

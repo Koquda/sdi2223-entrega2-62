@@ -36,8 +36,16 @@ module.exports = function (app, usersRepository) {
 
   // Lists users TODO
   app.get('/users', function (req, res) {
-    res.send('lista de usuarios');
+    // Find all users in the database
+    usersRepository.findUsers({}, {}).then(users => {
+      // Render the users list template with the users data
+      res.render("users.twig", { users: users });
+    }).catch(error => {
+      // If there's an error, redirect to the error page
+      res.redirect("/error");
+    });
   })
+
   // Get for signup
   app.get('/users/signup', function (req, res) {
     res.render("signup.twig",{session:req.session});
@@ -129,7 +137,7 @@ module.exports = function (app, usersRepository) {
         if (user.role === "admin"){
           res.redirect("/users")
         } else {
-          res.redirect("/users/listMyOffers");
+          res.redirect("/publications");
         }
       }
     }).catch(error => {
@@ -148,8 +156,4 @@ module.exports = function (app, usersRepository) {
     req.session.user = null;
     res.redirect("/users/login");
   })
-
-
-
-
 }

@@ -1,0 +1,31 @@
+{% extends "layout.twig" %}
+
+{% block title %} Lista de usuarios {% endblock %}
+
+{% block main_container %}
+    <h1>List of Users</h1>
+    <table style="border: 1px solid black;">
+        <thead>
+        <tr style="border: 1px solid black;">
+            <th style="border: 1px solid black;"> Email </th>
+            <th style="border: 1px solid black;"> Name </th>
+            <th style="border: 1px solid black;"> Surnames </th>
+            <th style="border: 1px solid black;"> Date of Birth </th>
+            <th style="border: 1px solid black;"> Wallet </th>
+            <th style="border: 1px solid black;"> Role </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr style="border: 1px solid black;">
+                <td style="border: 1px solid black;"> {{ user.email }} </td>
+                <td style="border: 1px solid black;"> {{ user.name }} </td>
+                <td style="border: 1px solid black;"> {{ user.surnames }} </td>
+                <td style="border: 1px solid black;"> {{ user.birthdate }} </td>
+                <td style="border: 1px solid black;"> {{ user.wallet }} </td>
+                <td style="border: 1px solid black;"> {{ user.role }} </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

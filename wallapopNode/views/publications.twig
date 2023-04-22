@@ -1,0 +1,35 @@
+{% extends "layout.twig" %}
+{% block title %} Mis publicaciones {% endblock %}
+{% block main_container %}
+	<h2>Mis publicaciones</h2>
+	<!-- Agregar Oferta -->
+	<div class="row text-right">
+		<a href="/offers/add" class="btn btn-info" role="button">Agregar oferta</a>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-hover">
+			<thead>
+			<tr>
+				<th>Titulo</th>
+				<th>Detalles</th>
+				<th>Fecha</th>
+				<th>Precio</th>
+				<th class="col-md-1"></th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for offer in offers %}
+				<tr>
+					<td>{{ offer.title }}</td>
+					<td>{{ offer.details }}</td>
+					<td>{{ offer.date }}</td>
+					<td>{{ offer.price }}</td>
+					<td><a href="/offers/edit/{{ offer._id }}">Modificar</a> <br>
+						<a href="/offers/delete/{{ offer._id }}">Eliminar</a> <br>
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
