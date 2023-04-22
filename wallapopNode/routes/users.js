@@ -90,17 +90,21 @@ module.exports = function (app, usersRepository) {
             email: user.email
         }
 
-        // Checks if the user is not already created
-        usersRepository.findUser(filter, {}).then(dbUser => {
-            if (dbUser == null) {
-                usersRepository.insertUser(user).then(userId => {
-                    res.redirect("/offers/listMyOffers") // TODO: arreglar esto
-                }).catch(error => {
-                    res.redirect("/users/signup" +
-                        "?message=Error while signup" +
-                        "&messageType=alert-danger ");
-                })
-            } else {
+    // Checks if the user is not already created
+    usersRepository.findUser(filter, {}).then( dbUser => {
+          if (dbUser == null) {
+            usersRepository.insertUser(user).then(userId => {
+              req.session.user = user.email;
+              req.session.wallet = user.wallet;
+              req.session.save();
+
+              res.redirect("/offers/myOffers")
+            }).catch(error => {
+              res.redirect("/users/signup" +
+                  "?message=Error while signup"+
+                  "&messageType=alert-danger ");
+            })
+          } else {
                 res.redirect("/users/signup" +
                     "?message=User already exists" +
                     "&messageType=alert-danger ");

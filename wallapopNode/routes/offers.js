@@ -3,24 +3,48 @@ module.exports = function(app, offersRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
-    app.get("/offers", function (req, res) {
-        let offers = [{
-            "title": "Blank space",
-            "price": "1.2"
-        }, {
-            "title": "See you again",
-            "price": "1.3"
-        }, {
-            "title": "Uptown Funk",
-            "price": "1.1"
-        }];
-
-        let response = {
-            seller: 'Tienda de ofertas',
-            offers: offers
-        };
-        res.render("shop.twig", response);
+    app.get("/offers/myOffers", function (req, res) {
+        offersRepository.getOffers({author: req.session.user},{}).then( (offers) => {
+            res.render("offers/list.twig", {session:req.session, offers: offers});
+        }).catch( error => {
+            res.redirect("/publications" +
+                '?message=Se ha producido un error al obtener sus ofertas.'+
+                "&messageType=alert-danger");
+        })
     });
+
+    app.get("/offers/delete/:id", function (req, res) {
+        let offerId = ObjectId(req.params.id);
+        let filter = {_id: ObjectId(req.params.id)};
+
+        offersRepository.findOffer(filter, {}).then(offer => {
+           if (offer == null){
+               res.redirect("/offers/myOffers" +
+                   '?message=Error occurred while trying to get the offer.'+
+                   "&messageType=alert-danger");
+           } else {
+               if (offer.author !== req.session.user){
+                   res.redirect("/offers/myOffers" +
+                       '?message=The offer you are trying to delete does not belong to you.'+
+                       "&messageType=alert-danger");
+               }
+               // TODO: queda comprobar que la oferta no haya vendido
+               offersRepository.deleteSong( {_id: offerId} , {}).then( result => {
+                   if (result === null || result.deletedCount === 0) {
+                       res.redirect("/offers/myOffers" +
+                           '?message=Could not eliminate the offer.'+
+                           "&messageType=alert-danger");
+                   } else {
+                       res.redirect("/publications");
+                   }
+               }).catch(error => {
+                   res.redirect("/offers/myOffers" +
+                       '?message=Error occurred while deleting the offer.'+
+                       "&messageType=alert-danger");
+               })
+           }
+        });
+    })
 
     app.post('/offers/add', [
         validator.body('details').notEmpty().withMessage("Details cant be empty"),
