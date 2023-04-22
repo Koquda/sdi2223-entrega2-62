@@ -1,11 +1,12 @@
-module.exports = function(app){
+var express = require('express');
+var router = express.Router();
 
-  app.get('/', function(req, res) {
-    res.render('index.twig');
-  });
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.redirect('/shop');
+});
 
-}
-
+module.exports = router;
 
 
 

@@ -138,7 +138,7 @@ module.exports = function (app, usersRepository) {
         if (user.role === "admin"){
           res.redirect("/users")
         } else {
-          res.redirect("/users/listMyOffers");
+          res.redirect("/publications");
         }
       }
     }).catch(error => {
@@ -150,7 +150,7 @@ module.exports = function (app, usersRepository) {
   })
 
   app.get("/users/listMyOffers",function(req,res){
-    res.render("index.twig",{wallet:req.session.wallet});
+    res.render("index.twig",{wallet:req.session.wallet, user: req.session.user});
   })
 
   app.get('/users/logout', function (req, res) {
