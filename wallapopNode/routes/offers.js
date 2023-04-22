@@ -1,5 +1,8 @@
 const {ObjectId} = require("mongodb");
 module.exports = function(app, offersRepository) {
+    const validator = app.get('validator')
+    const moment = app.get('moment')
+
     app.get("/offers", function (req, res) {
         let offers = [{
             "title": "Blank space",
@@ -19,7 +22,26 @@ module.exports = function(app, offersRepository) {
         res.render("shop.twig", response);
     });
 
-    app.post('/offers/add', function (req, res) {
+    app.post('/offers/add', [
+        validator.body('details').notEmpty().withMessage("Details cant be empty"),
+            validator.body('title').notEmpty().withMessage("Title cant be empty"),
+        validator.body("price")
+            .notEmpty().withMessage("Price cant be empty")
+            .isFloat({ min: 0 }).withMessage('Price must be a positive number')
+        ]
+        ,function (req, res) {
+
+            // If there are validation errors, show them
+            const errors = validator.validationResult(req);
+            if (!errors.isEmpty()) {
+                res.redirect("/offers/add" +
+                    "?message=" + errors.array().map(e => {
+                        return " " + e.msg
+                    }) +
+                    "&messageType=alert-danger ");
+                return
+            }
+
         let offer = {
             title: req.body.title,
             details: req.body.details,
@@ -38,7 +60,7 @@ module.exports = function(app, offersRepository) {
     });
 
     app.get('/offers/add', function (req, res) {
-        res.render("offers/add.twig");
+        res.render("offers/add.twig",{session:req.session});
     });
 
     app.get('/shop', function (req, res) {
@@ -149,7 +171,7 @@ module.exports = function(app, offersRepository) {
         let filter = {author: req.session.user};
         let options = {sort: {title: 1}};
         offersRepository.getOffers(filter, options).then(offers => {
-            res.render("publications.twig", {offers: offers});
+            res.render("publications.twig", {offers: offers,session:req.session});
         }).catch(error => {
             res.send("Se ha producido un error al listar las publicaciones del usuario:" + error);
         });

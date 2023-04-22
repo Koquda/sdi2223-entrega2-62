@@ -21,6 +21,9 @@ app.use(expressSession({
 }));
 
 
+let bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Express-Validator
