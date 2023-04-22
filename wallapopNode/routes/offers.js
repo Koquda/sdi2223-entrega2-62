@@ -3,23 +3,14 @@ module.exports = function(app, offersRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
-    app.get("/offers", function (req, res) {
-        let offers = [{
-            "title": "Blank space",
-            "price": "1.2"
-        }, {
-            "title": "See you again",
-            "price": "1.3"
-        }, {
-            "title": "Uptown Funk",
-            "price": "1.1"
-        }];
-
-        let response = {
-            seller: 'Tienda de ofertas',
-            offers: offers
-        };
-        res.render("shop.twig", response);
+    app.get("/offers/myOffers", function (req, res) {
+        offersRepository.getOffers({author: req.session.user},{}).then( (offers) => {
+            res.render("offers/list.twig", {session:req.session, offers: offers});
+        }).catch( error => {
+            res.redirect("/publications" +
+                '?message=Se ha producido un error al obtener sus ofertas.'+
+                "&messageType=alert-danger");
+        })
     });
 
     app.post('/offers/add', [

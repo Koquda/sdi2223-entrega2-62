@@ -94,7 +94,11 @@ module.exports = function (app, usersRepository) {
     usersRepository.findUser(filter, {}).then( dbUser => {
           if (dbUser == null) {
             usersRepository.insertUser(user).then(userId => {
-              res.redirect("/offers/listMyOffers") // TODO: arreglar esto
+              req.session.user = user.email;
+              req.session.wallet = user.wallet;
+              req.session.save();
+
+              res.redirect("/offers/myOffers")
             }).catch(error => {
               res.redirect("/users/signup" +
                   "?message=Error while signup"+
