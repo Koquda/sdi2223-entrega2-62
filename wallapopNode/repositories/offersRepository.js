@@ -5,6 +5,18 @@ module.exports = {
         this. mongoClient= mongoClient;
         this.app = app;
     },
+    deleteSong: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'offers';
+            const offersCollection = database.collection(collectionName);
+            const result = await offersCollection.deleteOne(filter, options);
+            return result;
+        } catch (error) {
+            throw (error);
+        }
+    },
     buyOffer: function (shop, callbackFunction) {
         this.mongoClient.connect(this.app.get('connectionStrings'), function (err, dbClient) {
             if (err) {

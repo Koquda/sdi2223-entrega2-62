@@ -13,6 +13,39 @@ module.exports = function(app, offersRepository) {
         })
     });
 
+    app.get("/offers/delete/:id", function (req, res) {
+        let offerId = ObjectId(req.params.id);
+        let filter = {_id: ObjectId(req.params.id)};
+
+        offersRepository.findOffer(filter, {}).then(offer => {
+           if (offer == null){
+               res.redirect("/offers/myOffers" +
+                   '?message=Error occurred while trying to get the offer.'+
+                   "&messageType=alert-danger");
+           } else {
+               if (offer.author !== req.session.user){
+                   res.redirect("/offers/myOffers" +
+                       '?message=The offer you are trying to delete does not belong to you.'+
+                       "&messageType=alert-danger");
+               }
+               // TODO: queda comprobar que la oferta no haya vendido
+               offersRepository.deleteSong( {_id: offerId} , {}).then( result => {
+                   if (result === null || result.deletedCount === 0) {
+                       res.redirect("/offers/myOffers" +
+                           '?message=Could not eliminate the offer.'+
+                           "&messageType=alert-danger");
+                   } else {
+                       res.redirect("/publications");
+                   }
+               }).catch(error => {
+                   res.redirect("/offers/myOffers" +
+                       '?message=Error occurred while deleting the offer.'+
+                       "&messageType=alert-danger");
+               })
+           }
+        });
+    })
+
     app.post('/offers/add', [
         validator.body('details').notEmpty().withMessage("Details cant be empty"),
             validator.body('title').notEmpty().withMessage("Title cant be empty"),
