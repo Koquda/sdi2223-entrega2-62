@@ -60,11 +60,11 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th>Titulo</th>
-            <th>Detalles</th>
-            <th>Fecha</th>
-            <th>Precio</th>
-            <th>Estado</th>
+            <th>Title</th>
+            <th>Details</th>
+            <th>Date</th>
+            <th>Price</th>
+            <th>State</th>
         </tr>
         </thead>
         <tbody>
@@ -75,10 +75,12 @@
                 <td>{{ offer.date }}</td>
                 <td>{{ offer.price }}</td>
                 {% if offer.purchased %}
-                    <td> Vendido </td>
+                    <td>
+                        <button class="btn btn-danger pull-right" disabled> Sold </button>
+                    </td>
                 {% else %}
                     <td>
-                        <a class="btn btn-primary pull-right" href="/offers/buy/{{ offer._id }}"> Comprar </a>
+                        <a class="btn btn-primary pull-right" href="/offers/buy/{{ offer._id }}"> Buy </a>
                     </td>
                 {% endif %}
             </tr>
@@ -90,7 +92,7 @@
         <ul class="pagination">
             {% for page in pages %}
                 <li class="page-item" id="pi-{{ page }}">
-                    <a class="page-link" href="/shop/?page={{ page }}">{{ page }}</a>
+                    <a class="page-link" href="/shop/?page={{ page }}{{ search }}">{{ page }}</a>
                 </li>
             {% endfor %}
             <script>

@@ -130,7 +130,6 @@ module.exports = function (app, usersRepository) {
             "&messageType=alert-danger ");
       } else {
         req.session.user = user.email;
-
         req.session.wallet = user.wallet;
 
         req.session.save();
@@ -138,7 +137,7 @@ module.exports = function (app, usersRepository) {
         if (user.role === "admin"){
           res.redirect("/users")
         } else {
-          res.redirect("/publications");
+          res.redirect("/offers/myOffers");
         }
       }
     }).catch(error => {
