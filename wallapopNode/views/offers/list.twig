@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>myWallapop</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    {% extends "layout.twig" %}
+    {% block title %} My offers {% endblock %}
+    {% block main_container %}
+        <!-- Búsqueda -->
+        <div class="row">
+            <div id="custom-search-input ">
+                <form method="get" action="/shop">
+                    <div class="input-group col-xs-8 col-sm-6 col-md-4 col-lg-5 pull-right">
+                        <input id="search" type="text" class="search-query form-control"
+                               placeholder="Titulo de la oferta" name="search"/>
+                        <span class="input-group-btn">
+                <button class="btn" type="submit">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+                </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <h2>Offers</h2>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Details</th>
+                <th>Date</th>
+                <th>Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for offer in offers %}
+                <tr>
+                    <td>{{ offer.title }}</td>
+                    <td>{{ offer.details }}</td>
+                    <td>{{ offer.date }}</td>
+                    <td>{{ offer.price }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <!-- Paginación mostrar la actual y 2 anteriores y dos siguientes -->
+        <div class="row text-center">
+            <ul class="pagination">
+                {% for page in pages %}
+                    <li class="page-item" id="pi-{{ page }}">
+                        <a class="page-link" href="/shop/?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endfor %}
+                <script>
+                    $("#pi-"+"{{ currentPage }}").addClass("active");
+                </script>
+            </ul>
+        </div>
+    {% endblock %}
+</div>
+</body>
+</html>

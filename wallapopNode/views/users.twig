@@ -4,28 +4,54 @@
 
 {% block main_container %}
     <h1>List of Users</h1>
-    <table style="border: 1px solid black;">
+    <form action="/users/deleteSelected" method="post">
+    <div class="table-responsive">
+    <table class="table table-hover">
         <thead>
-        <tr style="border: 1px solid black;">
-            <th style="border: 1px solid black;"> Email </th>
-            <th style="border: 1px solid black;"> Name </th>
-            <th style="border: 1px solid black;"> Surnames </th>
-            <th style="border: 1px solid black;"> Date of Birth </th>
-            <th style="border: 1px solid black;"> Wallet </th>
-            <th style="border: 1px solid black;"> Role </th>
+        <tr>
+            <th >  </th>
+            <th > Email </th>
+            <th > Name </th>
+            <th > Surnames </th>
+            <th > Date of Birth </th>
+            <th > Wallet </th>
+            <th > Role </th>
         </tr>
         </thead>
         <tbody>
         {% for user in users %}
             <tr style="border: 1px solid black;">
-                <td style="border: 1px solid black;"> {{ user.email }} </td>
-                <td style="border: 1px solid black;"> {{ user.name }} </td>
-                <td style="border: 1px solid black;"> {{ user.surnames }} </td>
-                <td style="border: 1px solid black;"> {{ user.birthdate }} </td>
-                <td style="border: 1px solid black;"> {{ user.wallet }} </td>
-                <td style="border: 1px solid black;"> {{ user.role }} </td>
+                <td><input type="checkbox" name="selectedUsers" value="{{ user.email }}" /></td>
+                <td > {{ user.email }} </td>
+                <td > {{ user.name }} </td>
+                <td > {{ user.surnames }} </td>
+                <td > {{ user.birthdate }} </td>
+                <td > {{ user.wallet }} </td>
+                <td > {{ user.role }} </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    </div>
+    <div class="form-group">
+        <button id="deleteButton"type="submit" class="btn btn-danger">Eliminar Seleccionados</button>
+    </div>
+    </form>
+
+    <script>
+        document.getElementById("deleteButton").addEventListener("click", function (event) {
+            var checkboxes = document.getElementsByName("selectedUsers");
+            var checked = false;
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    checked = true;
+                    break;
+                }
+            }
+            if (!checked) {
+                event.preventDefault();
+                alert("Por favor, seleccione al menos un usuario para eliminar.","My Wallapop: Error");
+            }
+        });
+    </script>
 {% endblock %}

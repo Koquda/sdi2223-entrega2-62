@@ -20,10 +20,10 @@ app.use(expressSession({
   saveUninitialized: true
 }));
 
-app.use(function(req, res, next) {
-  res.locals.session = req.session;
-  next();
-});
+
+let bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Express-Validator
@@ -57,7 +57,7 @@ app.use("/shop/",userSessionRouter);
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require("./routes/users.js")(app, usersRepository);
+require('./routes/users.js')(app, usersRepository);
 
 let offersRepository = require("./repositories/offersRepository.js");
 offersRepository.init(app, MongoClient);
