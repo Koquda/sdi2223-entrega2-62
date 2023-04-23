@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository) {
+module.exports = function (app, usersRepository,logsRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
@@ -56,6 +56,10 @@ module.exports = function (app, usersRepository) {
         validator.body('password').custom(passwordMatches),
         validator.body('birthdate').custom(isDateValid)
     ], function (req, res) {
+        let date = new Date();
+        let dateStr = date.toLocaleDateString();
+        let timeStr = date.toLocaleTimeString();
+        let logDate = `${dateStr} ${timeStr}`;
 
         // If there are validation errors, show them
         const errors = validator.validationResult(req);
@@ -97,6 +101,22 @@ module.exports = function (app, usersRepository) {
               req.session.wallet = user.wallet;
               req.session.save();
 
+                let mapping = req.url;
+                let method = req.method;
+                let params = JSON.stringify(req.body);
+
+
+                let type = "ALTA";
+                let description = `${mapping} ${method} ${params}`;
+
+                let log = {
+                    type:type,
+                    date:logDate,
+                    description:description
+                }
+
+                logsRepository.insertLog(log);
+
               res.redirect("/offers/myOffers")
             }).catch(error => {
               res.redirect("/users/signup" +
@@ -120,6 +140,11 @@ module.exports = function (app, usersRepository) {
     })
     // Post for login
     app.post('/users/login', function (req, res) {
+        let date = new Date();
+        let dateStr = date.toLocaleDateString();
+        let timeStr = date.toLocaleTimeString();
+        let logDate = `${dateStr} ${timeStr}`;
+
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave')).update(req.body.password).digest('hex')
         let filter = {
             email: req.body.email,
@@ -128,14 +153,38 @@ module.exports = function (app, usersRepository) {
         usersRepository.findUser(filter, {}).then(user => {
             if (user == null) {
                 req.session.user = null;
+
+                let type = "LOGIN-ERR";
+                let description = `${req.body.email}`;
+
+                let log = {
+                    type:type,
+                    date:logDate,
+                    description:description
+                }
+
+                logsRepository.insertLog(log);
+
                 res.redirect("/users/login" +
                     "?message=Email o password incorrecto"+
                     "&messageType=alert-danger ");
             } else {
                 req.session.user = user.email;
                 req.session.wallet = user.wallet;
+                req.session.role = user.role;
 
                 req.session.save();
+
+                let type = "LOGIN-EX";
+                let description = `${user.email}`;
+
+                let log = {
+                    type:type,
+                    date:logDate,
+                    description:description
+                }
+
+                logsRepository.insertLog(log);
 
                 if (user.role === "admin"){
                     res.redirect("/users")
@@ -151,7 +200,23 @@ module.exports = function (app, usersRepository) {
         })
     })
     app.get('/users/logout', function (req, res) {
-        req.session.user = null;
+        let date = new Date();
+        let dateStr = date.toLocaleDateString();
+        let timeStr = date.toLocaleTimeString();
+        let logDate = `${dateStr} ${timeStr}`;
+
+        let type = "LOGOUT";
+        let description = req.session.user;
+
+        let log={
+            type:type,
+            date:logDate,
+            description:description
+        }
+
+        logsRepository.insertLog(log);
+
+        req.session = null;
         res.redirect("/users/login");
     })
     app.post('/users/deleteSelected', function (req, res) {
