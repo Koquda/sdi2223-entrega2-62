@@ -151,15 +151,34 @@ module.exports = function (app, usersRepository) {
                 "&messageType=alert-danger ");
         })
     })
+  });
+  // Get for login
+  app.get('/users/login', function (req, res) {
+    res.render("login.twig")
+  })
+  // Post for login
+  app.post('/users/login', function (req, res) {
+    let securePassword = app.get("crypto").createHmac('sha256', app.get('clave')).update(req.body.password).digest('hex')
+    let filter = {
+      email: req.body.email,
+      password: securePassword
+    }
+    usersRepository.findUser(filter, {}).then(user => {
+      if (user == null) {
+        req.session.user = null;
+        res.redirect("/users/login" +
+            "?message=Email o password incorrecto"+
+            "&messageType=alert-danger ");
+      } else {
+        req.session.user = user.email;
+        req.session.wallet = user.wallet;
 
-    app.get("/users/listMyOffers", function (req, res) {
-        res.render("index.twig", {session: req.session});
-    })
 
     app.get('/users/logout', function (req, res) {
         req.session.user = null;
         res.redirect("/users/login");
     })
+
 
     app.post('/users/deleteSelected', function (req, res) {
         let selectedUsers = req.body.selectedUsers;

@@ -35,8 +35,8 @@ module.exports = {
     updateOffer: async function(newSong, filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
-            const database = client.db("musicStore");
-            const collectionName = 'songs';
+            const database = client.db("wallapopDB");
+            const collectionName = 'offers';
             const songsCollection = database.collection(collectionName);
             const result = await songsCollection.updateOne(filter, {$set: newSong}, options);
             return result;
@@ -58,7 +58,7 @@ module.exports = {
     },
     getOffersPg: async function (filter, options, page) {
         try {
-            const limit = 4;
+            const limit = 5;
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("wallapopDB");
             const collectionName = 'offers';

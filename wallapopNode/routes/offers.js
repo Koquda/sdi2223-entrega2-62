@@ -74,10 +74,10 @@ module.exports = function(app, offersRepository) {
             author: req.session.user
         }
         offersRepository.insertOffer(offer).then(offerId => {
-            res.redirect("/publications" + '?message=Oferta agregada.'+
+            res.redirect("/offers/myOffers" + '?message=Oferta agregada.'+
                 "&messageType=alert-info");
         }).catch(error => {
-            res.redirect("/publications" +
+            res.redirect("/offers/myOffers" +
                 '?message=Se ha producido un error al registrar la oferta.'+
                 "&messageType=alert-danger");
         });
@@ -90,35 +90,38 @@ module.exports = function(app, offersRepository) {
     app.get('/shop', function (req, res) {
         let filter = {};
         let options = {sort: {title: 1}};
+        let searchQuery = "";
         if (req.query.search != null && typeof (req.query.search) != "undefined" && req.query.search != "") {
-            filter = {"title": {$regex: ".*" + req.query.search + ".*"}};
+            filter = { "title": { $regex: new RegExp(req.query.search, "i") } };
+            searchQuery = "&search=" + req.query.search;
         }
-        let page = parseInt(req.query.page); // Es String !!!
+        let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
-            // Puede no venir el param
             page = 1;
         }
         offersRepository.getOffersPg(filter, options, page).then(result => {
-            let lastPage = result.total / 4;
-            if (result.total % 4 > 0) { // Sobran decimales
-                lastPage = lastPage + 1;
+            let totalOffers = result.total;
+            let offersPerPage = 5;
+            let lastPage = Math.ceil(totalOffers / offersPerPage);
+
+            let pages = [];
+            for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                pages.push(i);
             }
-            let pages = []; // paginas mostrar
-            for (let i = page - 2; i <= page + 2; i++) {
-                if (i > 0 && i <= lastPage) {
-                    pages.push(i);
-                }
-            }
+
             let response = {
                 offers: result.offers,
                 pages: pages,
-                currentPage: page
+                currentPage: page,
+                search: searchQuery
             }
+
             res.render("shop.twig", response);
         }).catch(error => {
             res.send("Se ha producido un error al listar las ofertas " + error);
         });
     });
+
 
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
@@ -135,14 +138,18 @@ module.exports = function(app, offersRepository) {
                 res.redirect("/shop" +
                     "?message=Eres el autor" +
                     "&messageType=alert-danger ");
-            } else {
+            } else if ((req.session.wallet - offer.price) < 0){
+                res.redirect("/shop" +
+                    "?message=No tienes dinero suficiente" +
+                    "&messageType=alert-danger ");
+            }else {
                 let filter = {user: req.session.user};
                 offersRepository.getPurchases(filter, options).then(myOffers => {
                     let result = myOffers.find(s => s.offerId.equals(ObjectId(req.params.id)));
                     let cantBuy = result == null;
                     if (!cantBuy) {
                         res.redirect("/shop" +
-                            "?message=Cancion comprada" +
+                            "?message=Cancion ya comprada" +
                             "&messageType=alert-danger ");
                     } else {
                         offersRepository.buyOffer(shop, function (shopId) {
@@ -150,20 +157,35 @@ module.exports = function(app, offersRepository) {
                                 res.send("Error al realizar la compra");
                             } else {
                                 let newOffer = {
-                                    title: offer.title,
-                                    details: offer.details,
-                                    date: offer.date,
-                                    price: offer.price,
-                                    author: req.session.user,
                                     purchased: true
                                 };
-                                let filter = {_id: offerId};
+                                let filter = {_id: shop.offerId};
                                 const options = {upsert: false};
                                 offersRepository.updateOffer(newOffer, filter, options).then(() => {
-                                    res.redirect("/publications");
-                                }).catch(error => {
-                                    res.send("Se ha producido un error al modificar la canción " + error);
-                                });
+                                    usersRepository.findUser({email: req.session.user}, {}).then(user =>{
+                                        if(user == null){
+                                            res.redirect("/shop" +
+                                                "?message=Error al buscar usuario" +
+                                                "&messageType=alert-danger ");
+                                        }else{
+                                            let newUser = {
+                                                wallet: user.wallet - offer.price  // resta el precio de la oferta comprada
+                                            };
+                                            let filter = {email: user.email};
+                                            const options = {upsert: false};
+                                            usersRepository.updateUser(newUser, filter, options).then(() => {
+                                                res.redirect("/shop");
+                                            }).catch(error => {
+                                                res.send("Se ha producido un error al actualizar el monedero " + error);
+                                            });
+                                        }
+                                    }).catch(error => {
+                                        res.send("Se ha producido un error al actualizar la oferta " + error);
+                                    });
+                                    }).catch(error => {
+                                        res.send("Se ha producido un error al buscar usuario " + error);
+                                    });
+
                             }
                         });
                     }
@@ -189,15 +211,6 @@ module.exports = function(app, offersRepository) {
             });
         }).catch(error => {
             res.send("Se ha producido un error al listar las offertas del usuario " + error);
-        });
-    });
-    app.get('/publications', function (req, res) {
-        let filter = {author: req.session.user};
-        let options = {sort: {title: 1}};
-        offersRepository.getOffers(filter, options).then(offers => {
-            res.render("publications.twig", {offers: offers,session:req.session});
-        }).catch(error => {
-            res.send("Se ha producido un error al listar las publicaciones del usuario:" + error);
         });
     });
 }
