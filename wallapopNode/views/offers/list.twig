@@ -30,6 +30,12 @@
                 </form>
             </div>
         </div>
+        <br>
+        <br>
+        <!-- Agregar Canción -->
+        <div class="row text-right">
+            <a href="/offers/add" class="btn btn-info" role="button">Add offer</a>
+        </div>
         <h2>Offers</h2>
         <table class="table table-hover">
             <thead>
@@ -47,6 +53,9 @@
                     <td>{{ offer.details }}</td>
                     <td>{{ offer.date }}</td>
                     <td>{{ offer.price }}</td>
+                    <td><a href="/offers/edit/{{ offer._id }}">Edit</a> <br>
+                        <a href="/offers/delete/{{ offer._id }}">Delete</a> <br>
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

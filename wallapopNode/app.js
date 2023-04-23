@@ -50,9 +50,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const userSessionRouter = require('./routes/userSessionRouter');
 app.use("/offers/add",userSessionRouter);
-app.use("/publications",userSessionRouter);
-app.use("/offers/buy",userSessionRouter);
 app.use("/purchases",userSessionRouter);
+app.use("/offers/buy",userSessionRouter);
+app.use("/offers/myOffers",userSessionRouter);
 app.use("/shop/",userSessionRouter);
 
 const usersRepository = require("./repositories/usersRepository.js");

@@ -1,5 +1,5 @@
 const {ObjectId} = require("mongodb");
-module.exports = function(app, offersRepository) {
+module.exports = function(app, offersRepository, usersRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
@@ -7,12 +7,11 @@ module.exports = function(app, offersRepository) {
         offersRepository.getOffers({author: req.session.user},{}).then( (offers) => {
             res.render("offers/list.twig", {session:req.session, offers: offers});
         }).catch( error => {
-            res.redirect("/publications" +
-                '?message=Se ha producido un error al obtener sus ofertas.'+
+            res.redirect("/shop" +
+                '?message=Error occurred when obtaining your offers.'+
                 "&messageType=alert-danger");
         })
     });
-
     app.get("/offers/delete/:id", function (req, res) {
         let offerId = ObjectId(req.params.id);
         let filter = {_id: ObjectId(req.params.id)};
@@ -28,14 +27,18 @@ module.exports = function(app, offersRepository) {
                        '?message=The offer you are trying to delete does not belong to you.'+
                        "&messageType=alert-danger");
                }
-               // TODO: queda comprobar que la oferta no haya vendido
+               if (offer.purchased) {
+                   res.redirect("/offers/myOffers" +
+                       '?message=The offer you are trying to delete is already sold.'+
+                       "&messageType=alert-danger");
+               }
                offersRepository.deleteSong( {_id: offerId} , {}).then( result => {
                    if (result === null || result.deletedCount === 0) {
                        res.redirect("/offers/myOffers" +
                            '?message=Could not eliminate the offer.'+
                            "&messageType=alert-danger");
                    } else {
-                       res.redirect("/publications");
+                       res.redirect("/offers/myOffers");
                    }
                }).catch(error => {
                    res.redirect("/offers/myOffers" +
@@ -45,7 +48,6 @@ module.exports = function(app, offersRepository) {
            }
         });
     })
-
     app.post('/offers/add', [
         validator.body('details').notEmpty().withMessage("Details cant be empty"),
             validator.body('title').notEmpty().withMessage("Title cant be empty"),
@@ -82,11 +84,9 @@ module.exports = function(app, offersRepository) {
                 "&messageType=alert-danger");
         });
     });
-
     app.get('/offers/add', function (req, res) {
         res.render("offers/add.twig",{session:req.session});
     });
-
     app.get('/shop', function (req, res) {
         let filter = {};
         let options = {sort: {title: 1}};
@@ -113,7 +113,8 @@ module.exports = function(app, offersRepository) {
                 offers: result.offers,
                 pages: pages,
                 currentPage: page,
-                search: searchQuery
+                search: searchQuery,
+                session: req.session
             }
 
             res.render("shop.twig", response);
@@ -121,8 +122,6 @@ module.exports = function(app, offersRepository) {
             res.send("Se ha producido un error al listar las ofertas " + error);
         });
     });
-
-
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
         let shop = {
@@ -171,9 +170,11 @@ module.exports = function(app, offersRepository) {
                                             let newUser = {
                                                 wallet: user.wallet - offer.price  // resta el precio de la oferta comprada
                                             };
+
                                             let filter = {email: user.email};
                                             const options = {upsert: false};
                                             usersRepository.updateUser(newUser, filter, options).then(() => {
+                                                req.session.wallet = newUser.wallet
                                                 res.redirect("/shop");
                                             }).catch(error => {
                                                 res.send("Se ha producido un error al actualizar el monedero " + error);
@@ -193,7 +194,6 @@ module.exports = function(app, offersRepository) {
             }
         });
     });
-
     app.get('/purchases', function (req, res) {
         let filter = {user: req.session.user};
         let options = {projection: {_id: 0, offerId: 1}};
@@ -205,12 +205,12 @@ module.exports = function(app, offersRepository) {
             let filter = {"_id": {$in: purchasedOffers}};
             let options = {sort: {title: 1}};
             offersRepository.getOffers(filter, options).then(offers => {
-                res.render("purchase.twig", {offers: offers});
+                res.render("purchase.twig", {offers: offers, session: req.session});
             }).catch(error => {
-                res.send("Se ha producido un error al listar las ofertas del usuario: " + error);
+                res.send("Error occurred when obtaining your purchases: " + error);
             });
         }).catch(error => {
-            res.send("Se ha producido un error al listar las offertas del usuario " + error);
+            res.send("Error occurred when listing your purchases " + error);
         });
     });
 }

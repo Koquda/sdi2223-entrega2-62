@@ -21,8 +21,6 @@
         <span class="icon-bar"></span>                        
       </button>
 
-
-
       {% if session.wallet %}
         <li><a href="#"><span class="glyphicon glyphicon-credit-card"></span> Wallet: {{ session.wallet }}</a></li>
       {% endif %}
@@ -30,8 +28,10 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
+            <li id="myshop" class="active"><a href="/shop">Shop</a></li>
+            <li id="myoffers"><a href="/offers/myOffers">Publications</a></li>
+            <li id="mybuy"><a href="/purchases">Purchases</a></li>
         </ul>
-
         <ul class="nav navbar-nav navbar-right">
             {% if session.user %}
                 <li><a href="/users/logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>

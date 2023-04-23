@@ -34,7 +34,7 @@ module.exports = function (app, usersRepository) {
         return `${day}-${month}-${year}`
     }
 
-    // Lists users TODO
+    // Lists users
     app.get('/users', function (req, res) {
         // Find all users in the database
         usersRepository.findUsers({}, {}).then(users => {
@@ -45,7 +45,6 @@ module.exports = function (app, usersRepository) {
             res.redirect("/error");
         });
     })
-
     // Get for signup
     app.get('/users/signup', function (req, res) {
         res.render("signup.twig", {session: req.session});
@@ -130,56 +129,31 @@ module.exports = function (app, usersRepository) {
             if (user == null) {
                 req.session.user = null;
                 res.redirect("/users/login" +
-                    "?message=Email o password incorrecto" +
+                    "?message=Email o password incorrecto"+
                     "&messageType=alert-danger ");
             } else {
                 req.session.user = user.email;
-
                 req.session.wallet = user.wallet;
 
+                req.session.save();
 
-                if (user.role === "admin") {
+                if (user.role === "admin"){
                     res.redirect("/users")
                 } else {
-                    res.redirect("/publications");
+                    res.redirect("/offers/myOffers");
                 }
             }
         }).catch(error => {
             req.session.user = null;
             res.redirect("/users/login" +
-                "?message=Se ha producido un error al buscar el usuario" +
+                "?message=Se ha producido un error al buscar el usuario"+
                 "&messageType=alert-danger ");
         })
     })
-  });
-  // Get for login
-  app.get('/users/login', function (req, res) {
-    res.render("login.twig")
-  })
-  // Post for login
-  app.post('/users/login', function (req, res) {
-    let securePassword = app.get("crypto").createHmac('sha256', app.get('clave')).update(req.body.password).digest('hex')
-    let filter = {
-      email: req.body.email,
-      password: securePassword
-    }
-    usersRepository.findUser(filter, {}).then(user => {
-      if (user == null) {
-        req.session.user = null;
-        res.redirect("/users/login" +
-            "?message=Email o password incorrecto"+
-            "&messageType=alert-danger ");
-      } else {
-        req.session.user = user.email;
-        req.session.wallet = user.wallet;
-
-
     app.get('/users/logout', function (req, res) {
         req.session.user = null;
         res.redirect("/users/login");
     })
-
-
     app.post('/users/deleteSelected', function (req, res) {
         let selectedUsers = req.body.selectedUsers;
 
@@ -192,7 +166,6 @@ module.exports = function (app, usersRepository) {
                 usersRepository.deleteUser(filter);
             }
         }
-
 
         res.redirect("/users");
 
