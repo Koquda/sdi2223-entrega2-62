@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository,logsRepository) {
+module.exports = function (app, usersRepository, logsRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
@@ -93,37 +93,37 @@ module.exports = function (app, usersRepository,logsRepository) {
             email: user.email
         }
 
-    // Checks if the user is not already created
-    usersRepository.findUser(filter, {}).then( dbUser => {
-          if (dbUser == null) {
-            usersRepository.insertUser(user).then(userId => {
-              req.session.user = user.email;
-              req.session.wallet = user.wallet;
-              req.session.save();
+        // Checks if the user is not already created
+        usersRepository.findUser(filter, {}).then(dbUser => {
+            if (dbUser == null) {
+                usersRepository.insertUser(user).then(userId => {
+                    req.session.user = user.email;
+                    req.session.wallet = user.wallet;
+                    req.session.save();
 
-                let mapping = req.url;
-                let method = req.method;
-                let params = JSON.stringify(req.body);
+                    let mapping = req.url;
+                    let method = req.method;
+                    let params = JSON.stringify(req.body);
 
 
-                let type = "ALTA";
-                let description = `${mapping} ${method} ${params}`;
+                    let type = "ALTA";
+                    let description = `${mapping} ${method} ${params}`;
 
-                let log = {
-                    type:type,
-                    date:logDate,
-                    description:description
-                }
+                    let log = {
+                        type: type,
+                        date: logDate,
+                        description: description
+                    }
 
-                logsRepository.insertLog(log);
+                    logsRepository.insertLog(log);
 
-              res.redirect("/offers/myOffers")
-            }).catch(error => {
-              res.redirect("/users/signup" +
-                  "?message=Error while signup"+
-                  "&messageType=alert-danger ");
-            })
-          } else {
+                    res.redirect("/offers/myOffers")
+                }).catch(error => {
+                    res.redirect("/users/signup" +
+                        "?message=Error while signup" +
+                        "&messageType=alert-danger ");
+                })
+            } else {
                 res.redirect("/users/signup" +
                     "?message=User already exists" +
                     "&messageType=alert-danger ");
@@ -158,15 +158,15 @@ module.exports = function (app, usersRepository,logsRepository) {
                 let description = `${req.body.email}`;
 
                 let log = {
-                    type:type,
-                    date:logDate,
-                    description:description
+                    type: type,
+                    date: logDate,
+                    description: description
                 }
 
                 logsRepository.insertLog(log);
 
                 res.redirect("/users/login" +
-                    "?message=Email o password incorrecto"+
+                    "?message=Email o password incorrecto" +
                     "&messageType=alert-danger ");
             } else {
                 req.session.user = user.email;
@@ -179,14 +179,14 @@ module.exports = function (app, usersRepository,logsRepository) {
                 let description = `${user.email}`;
 
                 let log = {
-                    type:type,
-                    date:logDate,
-                    description:description
+                    type: type,
+                    date: logDate,
+                    description: description
                 }
 
                 logsRepository.insertLog(log);
 
-                if (user.role === "admin"){
+                if (user.role === "admin") {
                     res.redirect("/users")
                 } else {
                     res.redirect("/offers/myOffers");
@@ -195,7 +195,7 @@ module.exports = function (app, usersRepository,logsRepository) {
         }).catch(error => {
             req.session.user = null;
             res.redirect("/users/login" +
-                "?message=Se ha producido un error al buscar el usuario"+
+                "?message=Se ha producido un error al buscar el usuario" +
                 "&messageType=alert-danger ");
         })
     })
@@ -208,31 +208,51 @@ module.exports = function (app, usersRepository,logsRepository) {
         let type = "LOGOUT";
         let description = req.session.user;
 
-        let log={
-            type:type,
-            date:logDate,
-            description:description
+        let log = {
+            type: type,
+            date: logDate,
+            description: description
         }
 
         logsRepository.insertLog(log);
 
         req.session = null;
-        res.redirect("/users/login");
+        res.render("login.twig", {session: req.session})
     })
     app.post('/users/deleteSelected', function (req, res) {
         let selectedUsers = req.body.selectedUsers;
 
-        if(typeof selectedUsers === "string"){
-            let filter={email:selectedUsers};
-            usersRepository.deleteUser(filter);
-        }else{
-            for(let i=0; i <  selectedUsers.length;i++){
-                let filter={email:selectedUsers[i]};
-                usersRepository.deleteUser(filter);
+        if (typeof selectedUsers === "string") {
+            let filter = {email: selectedUsers};
+            usersRepository.findUser(filter,{}).then(user => {
+                if(user != null){
+                    if (user.role == "user") {
+                        usersRepository.deleteUser(filter).then( cant =>{
+                            res.redirect("/users");
+                        } );
+                    }
+                }
+            })
+
+        } else {
+            for (let i = 0; i < selectedUsers.length; i++) {
+                let filter = {email: selectedUsers[i]};
+                usersRepository.findUser(filter, {}).then(user => {
+                    if(user != null){
+                        if (user.role == "user") {
+                            usersRepository.deleteUser(filter).then(cant => {
+                                res.redirect("/users");
+                            });
+                        }
+                    }
+
+
+                })
+
+
             }
         }
 
-        res.redirect("/users");
 
     })
 }
