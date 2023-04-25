@@ -44,6 +44,7 @@
                 <th>Details</th>
                 <th>Date</th>
                 <th>Price</th>
+                <th>Highlight</th>
             </tr>
             </thead>
             <tbody>
@@ -56,6 +57,15 @@
                     <td>
                         <a href="/offers/delete/{{ offer._id }}">Delete</a> <br>
                     </td>
+                        {% if offer.highlighted %}
+                            <td>
+                                <a class="btn btn-danger pull-right" href="/offers/unhighlight/{{ offer._id }}"> Make Normal </a>
+                            </td>
+                        {% else %}
+                            <td>
+                                <a class="btn btn-primary pull-right" href="/offers/highlight/{{ offer._id }}"> Highlight offer</a>
+                            </td>
+                        {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
@@ -73,6 +83,40 @@
                 </script>
             </ul>
         </div>
+        {% if highlighted %}
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>State</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for offerH in highlighted %}
+                    <tr>
+                        <td>{{ offerH.title }}</td>
+                        <td>{{ offerH.details }}</td>
+                        <td>{{ offerH.date }}</td>
+                        <td>{{ offerH.price }}</td>
+                        {% if offerH.purchased %}
+                            <td>
+                                <button class="btn btn-danger pull-right" disabled> Sold </button>
+                            </td>
+                        {% else %}
+                            <td>
+                                <a class="btn btn-primary pull-right" href="/offers/buy/{{ offerH._id }}"> Buy </a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h2>There are no highlighted offers</h2>
+        {% endif %}
     {% endblock %}
 </div>
 </body>

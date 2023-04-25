@@ -5,11 +5,23 @@ module.exports = {
         this. mongoClient= mongoClient;
         this.app = app;
     },
-    deleteSong: async function (filter, options) {
+    deleteOffer: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("wallapopDB");
             const collectionName = 'offers';
+            const offersCollection = database.collection(collectionName);
+            const result = await offersCollection.deleteOne(filter, options);
+            return result;
+        } catch (error) {
+            throw (error);
+        }
+    },
+    deleteHighlightedOffer: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'highlightedOffers';
             const offersCollection = database.collection(collectionName);
             const result = await offersCollection.deleteOne(filter, options);
             return result;
@@ -88,6 +100,18 @@ module.exports = {
             throw (error);
         }
     },
+    getHighlightedOffers: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'highlightedOffers';
+            const offersCollection = database.collection(collectionName);
+            const offers = await offersCollection.find(filter, options).toArray();
+            return offers;
+        } catch (error) {
+            throw (error);
+        }
+    },
     getOffers: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
@@ -111,6 +135,30 @@ module.exports = {
         } catch (error) {
             throw (error);
         }
+    },
+    findHighlightedOffer: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'highlightedOffers';
+            const offersCollection = database.collection(collectionName);
+            const offer = await offersCollection.findOne(filter, options);
+            return offer;
+        } catch (error) {
+            throw (error);
+        }
+    },
+    insertHighlight: async function (offer){
+      try {
+          const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+          const database = client.db("wallapopDB");
+          const collectionName = 'highlightedOffers';
+          const offersCollection = database.collection(collectionName);
+          const result = await offersCollection.insertOne(offer);
+          return result.insertedId;
+      } catch (error) {
+          throw (error);
+      }
     },
     insertOffer: async function (offer) {
         try {
