@@ -33,30 +33,31 @@ module.exports = function(app, offersRepository, usersRepository) {
         }
         offersRepository.getOffersPg(filter, options, page).then(result => {
          offersRepository.getHighlightedOffers({},{}).then(highlightedOffers => {
-         if (highlightedOffers == null){
-                    res.redirect("/shop" +
-                        '?message=Error occurred when obtaining highlighted offers.'+
-                        "&messageType=alert-danger");
-                } else {
-                let totalOffers = result.total;
-                let offersPerPage = 5;
-                let lastPage = Math.ceil(totalOffers / offersPerPage);
+             if (highlightedOffers == null) {
+                 res.redirect("/shop" +
+                     '?message=Error occurred when obtaining highlighted offers.' +
+                     "&messageType=alert-danger");
+             } else {
+                 let totalOffers = result.total;
+                 let offersPerPage = 5;
+                 let lastPage = Math.ceil(totalOffers / offersPerPage);
 
-                let pages = [];
-                for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
-                    pages.push(i);
-                }
+                 let pages = [];
+                 for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                     pages.push(i);
+                 }
 
-                let response = {
-                    offers: result.offers,
-                    pages: pages,
-                    currentPage: page,
-                    session: req.session,
-                    highlighted: highlightedOffers
-                }
-                res.render("offers/list.twig", response);
-                })
-                }
+                 let response = {
+                     offers: result.offers,
+                     pages: pages,
+                     currentPage: page,
+                     session: req.session,
+                     highlighted: highlightedOffers
+                 }
+                 res.render("offers/list.twig", response);
+             }
+         })
+
         }).catch( error => {
             res.redirect("/shop" +
                 '?message=Error occurred when obtaining your offers.'+
@@ -67,6 +68,7 @@ module.exports = function(app, offersRepository, usersRepository) {
     app.get("/offers/delete/:id", function (req, res) {
         let offerId = ObjectId(req.params.id);
         let filter = {_id: ObjectId(req.params.id)};
+        let offerToBeDeleted
 
         offersRepository.findOffer(filter, {}).then(offer => {
            if (offer == null){
@@ -74,6 +76,7 @@ module.exports = function(app, offersRepository, usersRepository) {
                    '?message=Error occurred while trying to get the offer.'+
                    "&messageType=alert-danger");
            } else {
+               offerToBeDeleted = offer
                if (offer.author !== req.session.user){
                    res.redirect("/offers/myOffers" +
                        '?message=The offer you are trying to delete does not belong to you.'+
@@ -90,7 +93,20 @@ module.exports = function(app, offersRepository, usersRepository) {
                            '?message=Could not eliminate the offer.'+
                            "&messageType=alert-danger");
                    } else {
-                       res.redirect("/offers/myOffers");
+                       if (offerToBeDeleted.highlighted) {
+                           offersRepository.deleteHighlightedOffer({_id: offerId}, {}).then( result2 => {
+                               if (result === null || result.deletedCount === 0) {
+                                   res.redirect("/offers/myOffers" +
+                                       '?message=Could not eliminate the offer.' +
+                                       "&messageType=alert-danger");
+                               } else {
+                                   res.redirect("/offers/myOffers");
+                               }
+                           })
+                       }
+                       else {
+                           res.redirect("/offers/myOffers");
+                       }
                    }
                }).catch(error => {
                    res.redirect("/offers/myOffers" +
@@ -307,6 +323,7 @@ module.exports = function(app, offersRepository, usersRepository) {
             } else {
                 offersRepository.findHighlightedOffer({_id: ObjectId(req.params.id)}, {}).then(highOffer => {
                     if (highOffer == null){
+                        offer.highlighted = true
                         payHighlight(req, res)
                         offersRepository.insertHighlight(offer).then( offerId => {
                             if (offerId == null) {
@@ -314,7 +331,6 @@ module.exports = function(app, offersRepository, usersRepository) {
                                     '?message=Error when highlighting offer.'+
                                     "&messageType=alert-danger");
                             } else {
-                                offer.highlighted = true
                                 offersRepository.updateOffer(offer, {_id:ObjectId(req.params.id)}, {}).then(updatedOffer => {
                                     if (updatedOffer == null) {
                                         res.redirect("/offers/myOffers" +
