@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository, logsRepository) {
+module.exports = function (app, usersRepository, logsRepository, offersRepository) {
     const validator = app.get('validator')
     const moment = app.get('moment')
 
@@ -217,6 +217,7 @@ module.exports = function (app, usersRepository, logsRepository) {
         logsRepository.insertLog(log);
 
         req.session = null;
+        req.session.wallet=null;
         res.render("login.twig", {session: req.session})
     })
     app.post('/users/deleteSelected', function (req, res) {
@@ -224,13 +225,16 @@ module.exports = function (app, usersRepository, logsRepository) {
 
         if (typeof selectedUsers === "string") {
             let filter = {email: selectedUsers};
-            usersRepository.findUser(filter,{}).then(user => {
-                if(user != null){
-                    if (user.role == "user") {
-                        usersRepository.deleteUser(filter).then( cant =>{
+            usersRepository.findUser(filter, {}).then(user => {
+                if (user != null && user.role == "user") {
+
+                    usersRepository.deleteUser(filter).then(cant => {
+                        offersRepository.deleteOffer({author: user.email}, {}).then(cant => {
                             res.redirect("/users");
-                        } );
-                    }
+                        })
+
+                    });
+
                 }
             })
 
@@ -238,21 +242,20 @@ module.exports = function (app, usersRepository, logsRepository) {
             for (let i = 0; i < selectedUsers.length; i++) {
                 let filter = {email: selectedUsers[i]};
                 usersRepository.findUser(filter, {}).then(user => {
-                    if(user != null){
-                        if (user.role == "user") {
-                            usersRepository.deleteUser(filter).then(cant => {
-                                res.redirect("/users");
-                            });
-                        }
+                    if (user != null && user.role == "user") {
+
+                        usersRepository.deleteUser(filter).then(cant => {
+                            offersRepository.deleteOffer({author: user.email}, {}).then(cant => {
+                                if(i == selectedUsers.length - 1){
+                                    res.redirect("/users");
+                                }
+
+                            })
+                        });
                     }
-
-
                 })
-
-
             }
+
         }
-
-
     })
 }

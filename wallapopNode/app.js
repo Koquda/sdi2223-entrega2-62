@@ -106,11 +106,12 @@ let logsRepository = require('./repositories/logsRepository.js');
 logsRepository.init(app, MongoClient);
 require("./routes/logs.js")(app,logsRepository)
 
+let offersRepository = require("./repositories/offersRepository.js");
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require('./routes/users.js')(app, usersRepository,logsRepository);
+require('./routes/users.js')(app, usersRepository,logsRepository,offersRepository);
 
-let offersRepository = require("./repositories/offersRepository.js");
+
 offersRepository.init(app, MongoClient);
 require("./routes/offers.js")(app, offersRepository, usersRepository);
 
