@@ -4,14 +4,36 @@ module.exports = function(app, offersRepository, usersRepository) {
     const moment = app.get('moment')
 
     app.get("/offers/myOffers", function (req, res) {
-        offersRepository.getOffers({author: req.session.user},{}).then( (offers) => {
-            res.render("offers/list.twig", {session:req.session, offers: offers});
+        let filter = {author: req.session.user}
+        let options = {sort: {title: 1}};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offersRepository.getOffersPg(filter, options, page).then(result => {
+            let totalOffers = result.total;
+            let offersPerPage = 5;
+            let lastPage = Math.ceil(totalOffers / offersPerPage);
+
+            let pages = [];
+            for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                pages.push(i);
+            }
+
+            let response = {
+                offers: result.offers,
+                pages: pages,
+                currentPage: page,
+                session: req.session
+            }
+            res.render("offers/list.twig", response);
         }).catch( error => {
             res.redirect("/shop" +
                 '?message=Error occurred when obtaining your offers.'+
                 "&messageType=alert-danger");
         })
     });
+
     app.get("/offers/delete/:id", function (req, res) {
         let offerId = ObjectId(req.params.id);
         let filter = {_id: ObjectId(req.params.id)};
@@ -122,6 +144,7 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("Se ha producido un error al listar las ofertas " + error);
         });
     });
+
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
         let shop = {
