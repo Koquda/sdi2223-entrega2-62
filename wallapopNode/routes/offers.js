@@ -25,22 +25,45 @@ module.exports = function(app, offersRepository, usersRepository) {
     }
 
     app.get("/offers/myOffers", function (req, res) {
-        offersRepository.getOffers({author: req.session.user},{}).then( (offers) => {
-            offersRepository.getHighlightedOffers({},{}).then(highlightedOffers => {
-                if (highlightedOffers == null){
+        let filter = {author: req.session.user}
+        let options = {sort: {title: 1}};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offersRepository.getOffersPg(filter, options, page).then(result => {
+         offersRepository.getHighlightedOffers({},{}).then(highlightedOffers => {
+         if (highlightedOffers == null){
                     res.redirect("/shop" +
                         '?message=Error occurred when obtaining highlighted offers.'+
                         "&messageType=alert-danger");
                 } else {
-                    res.render("offers/list.twig", {session:req.session, offers: offers, highlighted: highlightedOffers});
+                let totalOffers = result.total;
+                let offersPerPage = 5;
+                let lastPage = Math.ceil(totalOffers / offersPerPage);
+
+                let pages = [];
+                for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                    pages.push(i);
                 }
-            })
+
+                let response = {
+                    offers: result.offers,
+                    pages: pages,
+                    currentPage: page,
+                    session: req.session,
+                    highlighted: highlightedOffers
+                }
+                res.render("offers/list.twig", response);
+                })
+                }
         }).catch( error => {
             res.redirect("/shop" +
                 '?message=Error occurred when obtaining your offers.'+
                 "&messageType=alert-danger");
         })
     });
+
     app.get("/offers/delete/:id", function (req, res) {
         let offerId = ObjectId(req.params.id);
         let filter = {_id: ObjectId(req.params.id)};
@@ -164,6 +187,7 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("Se ha producido un error al listar las ofertas " + error);
         });
     });
+
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
         let shop = {
@@ -239,20 +263,39 @@ module.exports = function(app, offersRepository, usersRepository) {
     app.get('/purchases', function (req, res) {
         let filter = {user: req.session.user};
         let options = {projection: {_id: 0, offerId: 1}};
-        offersRepository.getPurchases(filter, options).then(purchasedIds => {
+
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offersRepository.getPurchasesPg(filter, options, page).then(result => {
             let purchasedOffers = [];
-            for (let i = 0; i < purchasedIds.length; i++) {
-                purchasedOffers.push(purchasedIds[i].offerId)
+            for (let i = 0; i < result.purchases.length; i++) {
+                purchasedOffers.push(result.purchases[i].offerId)
+            }
+            let totalPurchases = result.total;
+            let purchasesPerPage = 5;
+            let lastPage = Math.ceil(totalPurchases / purchasesPerPage);
+
+            let pages = [];
+            for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                pages.push(i);
             }
             let filter = {"_id": {$in: purchasedOffers}};
             let options = {sort: {title: 1}};
-            offersRepository.getOffers(filter, options).then(offers => {
-                res.render("purchase.twig", {offers: offers, session: req.session});
+            offersRepository.getOffers(filter, options).then(purchases => {
+                let response = {
+                    purchases: purchases,
+                    pages: pages,
+                    currentPage: page,
+                    session: req.session
+                }
+                res.render("purchase.twig", response);
             }).catch(error => {
                 res.send("Error occurred when obtaining your purchases: " + error);
             });
         }).catch(error => {
-            res.send("Error occurred when listing your purchases " + error);
+            res.send("Error occurred when obtaining your purchases: " + error);
         });
     });
     app.get('/offers/highlight/:id', function (req, res) {

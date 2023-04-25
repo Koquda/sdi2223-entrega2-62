@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+let log4js = require('log4js');
 
 
 var app = express();
@@ -11,6 +12,22 @@ let rest = require('request');
 app.set('rest', rest);
 
 let crypto = require('crypto');
+
+log4js.configure({
+  appenders: {
+    console: { type: 'console' }
+  },
+  categories: {
+    default: { appenders: ['console'], level: 'debug' }
+  }
+});
+
+let logger4 = log4js.getLogger();
+
+
+
+
+
 
 // Espress-session
 let expressSession = require('express-session');
@@ -24,6 +41,33 @@ app.use(expressSession({
 let bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  let date = new Date();
+  let dateStr = date.toLocaleDateString();
+  let timeStr = date.toLocaleTimeString();
+  let logDate = `${dateStr} ${timeStr}`;
+
+  let mapping = req.url;
+  let method = req.method;
+  let params = JSON.stringify(req.body);
+
+
+  let type = "PET";
+  let description = `${mapping} ${method} ${params}`;
+
+  let log = {
+    type:type,
+    date:logDate,
+    description:description
+  }
+
+  logger4.info(type+"-"+logDate+"-"+description);
+
+  logsRepository.insertLog(log);
+
+  next();
+});
 
 
 // Express-Validator
@@ -55,19 +99,30 @@ app.use("/offers/buy",userSessionRouter);
 app.use("/offers/myOffers",userSessionRouter);
 app.use("/shop/",userSessionRouter);
 
+let logsAdminRouter = require('./routes/logsAdminRouter.js');
+app.use("/log",logsAdminRouter);
+
+let logsRepository = require('./repositories/logsRepository.js');
+logsRepository.init(app, MongoClient);
+require("./routes/logs.js")(app,logsRepository)
+
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require('./routes/users.js')(app, usersRepository);
+require('./routes/users.js')(app, usersRepository,logsRepository);
 
 let offersRepository = require("./repositories/offersRepository.js");
 offersRepository.init(app, MongoClient);
 require("./routes/offers.js")(app, offersRepository, usersRepository);
+
+
 
 let indexRouter = require('./routes/index.js');
 app.use('/', indexRouter);
 
 app.set('clave','abcdefg');
 app.set('crypto',crypto);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

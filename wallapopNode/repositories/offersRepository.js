@@ -68,6 +68,22 @@ module.exports = {
             throw (error);
         }
     },
+    getPurchasesPg: async function (filter, options, page) {
+        try {
+            const limit = 5;
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'purchases';
+            const purchasesCollection = database.collection(collectionName);
+            const purchasesCollectionCount = await purchasesCollection.count();
+            const cursor = purchasesCollection.find(filter, options).skip((page - 1) * limit).limit(limit)
+            const purchases = await cursor.toArray();
+            const result = {purchases: purchases, total: purchasesCollectionCount};
+            return result;
+        } catch (error) {
+            throw (error);
+        }
+    },
     getOffersPg: async function (filter, options, page) {
         try {
             const limit = 5;

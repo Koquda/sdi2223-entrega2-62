@@ -1,0 +1,49 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Logs{% endblock %}
+
+{% block main_container %}
+    <h2>Logs</h2>
+    <p>Los logs que actualmente figuran en el sistema son los siguientes:</p>
+    <div>
+        <form action="/log/filter" method="POST">
+            <div class="form-group">
+                <label for="type">Filtrar por tipo:</label>
+                <select class="form-control" id="type" name="type">
+                    <option value="">Todos</option>
+                    <option value="PET">PET</option>
+                    <option value="ALTA">ALTA</option>
+                    <option value="LOGIN-EX">LOGIN-EX</option>
+                    <option value="LOGIN-ERR">LOGIN-ERR</option>
+                    <option value="LOGOUT">LOGOUT</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+    </div>
+
+    <form>
+        <button style="background-color: darkcyan" type="submit" formaction="/log/delete" class="btn btn-danger">Eliminar todos los logs</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="tableLogs">
+            <thead>
+            <tr>
+                <th scope="col">Tipo</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Detalles</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in logList %}
+                <tr>
+                    <td scope="row">{{ log.type }}</td>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
