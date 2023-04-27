@@ -217,11 +217,11 @@ module.exports = function(app, offersRepository, usersRepository) {
             let cantBuy = offer.author == req.session.user;
             if (cantBuy) {
                 res.redirect("/shop" +
-                    "?message=Eres el autor" +
+                    "?message=You are the author" +
                     "&messageType=alert-danger ");
             } else if ((req.session.wallet - offer.price) < 0){
                 res.redirect("/shop" +
-                    "?message=No tienes dinero suficiente" +
+                    "?message=You don't have enough money" +
                     "&messageType=alert-danger ");
             }else {
                 let filter = {user: req.session.user};
@@ -230,12 +230,12 @@ module.exports = function(app, offersRepository, usersRepository) {
                     let cantBuy = result == null;
                     if (!cantBuy) {
                         res.redirect("/shop" +
-                            "?message=Cancion ya comprada" +
+                            "?message=Offer already purchased" +
                             "&messageType=alert-danger ");
                     } else {
                         offersRepository.buyOffer(shop, function (shopId) {
                             if (shopId == null) {
-                                res.send("Error al realizar la compra");
+                                res.send("Error when making the purchase");
                             } else {
                                 let newOffer = {
                                     purchased: true
@@ -243,37 +243,52 @@ module.exports = function(app, offersRepository, usersRepository) {
                                 let filter = {_id: shop.offerId};
                                 const options = {upsert: false};
                                 offersRepository.updateOffer(newOffer, filter, options).then(() => {
-                                    usersRepository.findUser({email: req.session.user}, {}).then(user =>{
-                                        if(user == null){
-                                            res.redirect("/shop" +
-                                                "?message=Error al buscar usuario" +
-                                                "&messageType=alert-danger ");
-                                        }else{
-                                            let newUser = {
-                                                wallet: user.wallet - offer.price  // resta el precio de la oferta comprada
-                                            };
+                                    let newOffer = {
+                                        purchased: true
+                                    };
+                                    let filter = {_id: shop.offerId};
+                                    const options = {upsert: false};
+                                    offersRepository.updateHighlightedOffer(newOffer, filter, options).then(() => {
+                                        usersRepository.findUser({email: req.session.user}, {}).then(user =>{
+                                            if(user == null){
+                                                res.redirect("/shop" +
+                                                    "?message=Error searching user" +
+                                                    "&messageType=alert-danger ");
+                                            }else{
+                                                let newUser = {
+                                                    wallet: user.wallet - offer.price  // resta el precio de la oferta comprada
+                                                };
 
-                                            let filter = {email: user.email};
-                                            const options = {upsert: false};
-                                            usersRepository.updateUser(newUser, filter, options).then(() => {
-                                                req.session.wallet = newUser.wallet
-                                                res.redirect("/shop");
-                                            }).catch(error => {
-                                                res.send("Se ha producido un error al actualizar el monedero " + error);
-                                            });
-                                        }
+                                                let filter = {email: user.email};
+                                                const options = {upsert: false};
+                                                usersRepository.updateUser(newUser, filter, options).then(() => {
+                                                    req.session.wallet = newUser.wallet
+                                                    res.redirect("/shop");
+                                                }).catch(error => {
+                                                    res.send("An error occurred while updating the user" + error);
+                                                });
+                                            }
+                                        }).catch(error => {
+                                            res.send("An error occurred while searching for the user" + error);
+                                        });
                                     }).catch(error => {
-                                        res.send("Se ha producido un error al actualizar la oferta " + error);
-                                    });
-                                    }).catch(error => {
-                                        res.send("Se ha producido un error al buscar usuario " + error);
+                                        res.send("An error occurred while updating the featured offer" + error);
                                     });
 
+                                    }).catch(error => {
+                                        res.send("An error occurred while updating the offer" + error);
+                                    });
                             }
+                        }).catch(error => {
+                            res.send("An error occurred while buying the offer" + error);
                         });
                     }
+                }).catch(error => {
+                    res.send("An error occurred while searching the purchased offers" + error);
                 });
             }
+        }).catch(error => {
+            res.send("An error occurred while searching the offer" + error);
         });
     });
     app.get('/purchases', function (req, res) {
