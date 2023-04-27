@@ -37,9 +37,27 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
     // Lists users
     app.get('/users', function (req, res) {
         // Find all users in the database
-        usersRepository.findUsers({}, {}).then(users => {
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        usersRepository.findUsersPg({}, {}, page).then(result => {
+            let totalUsers = result.total;
+            let usersPerPage = 5;
+            let lastPage = Math.ceil(totalUsers / usersPerPage);
+
+            let pages = [];
+            for (let i = Math.max(page - 2, 1); i <= Math.min(page + 2, lastPage); i++) {
+                pages.push(i);
+            }
+            let response = {
+                users: result.users,
+                pages: pages,
+                currentPage: page,
+                session: req.session
+            }
             // Render the users list template with the users data
-            res.render("users.twig", {users: users, session: req.session});
+            res.render("users.twig", response);
         }).catch(error => {
             // If there's an error, redirect to the error page
             res.redirect("/error");
