@@ -8,6 +8,10 @@ let log4js = require('log4js');
 
 
 var app = express();
+
+let jwt = require("jsonwebtoken")
+app.set("jwt", jwt)
+
 let rest = require('request');
 app.set('rest', rest);
 
@@ -57,12 +61,12 @@ app.use((req, res, next) => {
   let description = `${mapping} ${method} ${params}`;
 
   let log = {
-    type:type,
-    date:logDate,
-    description:description
+    type: type,
+    date: logDate,
+    description: description
   }
 
-  logger4.info(type+"-"+logDate+"-"+description);
+  logger4.info(type + "-" + logDate + "-" + description);
 
   logsRepository.insertLog(log);
 
@@ -71,8 +75,8 @@ app.use((req, res, next) => {
 
 
 // Express-Validator
-const {body, validationResult} = require('express-validator');
-app.set('validator', {body, validationResult})
+const { body, validationResult } = require('express-validator');
+app.set('validator', { body, validationResult })
 const moment = require('moment');
 app.set('moment', moment)
 
@@ -93,35 +97,39 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const userSessionRouter = require('./routes/userSessionRouter');
-app.use("/offers/add",userSessionRouter);
-app.use("/purchases",userSessionRouter);
-app.use("/offers/buy",userSessionRouter);
-app.use("/offers/myOffers",userSessionRouter);
-app.use("/shop/",userSessionRouter);
+app.use("/offers/add", userSessionRouter);
+app.use("/purchases", userSessionRouter);
+app.use("/offers/buy", userSessionRouter);
+app.use("/offers/myOffers", userSessionRouter);
+app.use("/shop/", userSessionRouter);
+
+const userTokenRouter = require('./routes/userTokenRouter');
+app.use("/api/offers", userTokenRouter);
 
 let logsAdminRouter = require('./routes/logsAdminRouter.js');
-app.use("/log",logsAdminRouter);
+app.use("/log", logsAdminRouter);
 
 let logsRepository = require('./repositories/logsRepository.js');
 logsRepository.init(app, MongoClient);
-require("./routes/logs.js")(app,logsRepository)
+require("./routes/logs.js")(app, logsRepository)
 
 let offersRepository = require("./repositories/offersRepository.js");
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require('./routes/users.js')(app, usersRepository,logsRepository,offersRepository);
+require('./routes/users.js')(app, usersRepository, logsRepository, offersRepository);
 
 
 offersRepository.init(app, MongoClient);
 require("./routes/offers.js")(app, offersRepository, usersRepository);
-
+require("./routes/api/offersAPI.js")(app, offersRepository)
+require("./routes/api/usersAPI.js")(app, usersRepository)
 
 
 let indexRouter = require('./routes/index.js');
 app.use('/', indexRouter);
 
-app.set('clave','abcdefg');
-app.set('crypto',crypto);
+app.set('clave', 'abcdefg');
+app.set('crypto', crypto);
 
 
 
