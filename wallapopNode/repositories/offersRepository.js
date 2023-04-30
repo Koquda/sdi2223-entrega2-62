@@ -183,5 +183,18 @@ module.exports = {
         } catch (error) {
             throw (error);
         }
+    },
+    findOfferOwner: async function (filter) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'offers';
+            const offersCollection = database.collection(collectionName);
+            const result = await offersCollection.findOne(filter);
+            return result;
+        } catch (error) {
+            throw (error);
+        }
     }
+
 };

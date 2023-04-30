@@ -103,6 +103,8 @@ app.use("/offers/buy", userSessionRouter);
 app.use("/offers/myOffers", userSessionRouter);
 app.use("/shop/", userSessionRouter);
 
+
+
 const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/api/offers", userTokenRouter);
 
@@ -118,10 +120,12 @@ const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require('./routes/users.js')(app, usersRepository, logsRepository, offersRepository);
 
+let conversationsRepository = require("./repositories/conversationsRepository.js");
+conversationsRepository.init(app, MongoClient);
 
 offersRepository.init(app, MongoClient);
 require("./routes/offers.js")(app, offersRepository, usersRepository);
-require("./routes/api/offersAPI.js")(app, offersRepository)
+require("./routes/api/offersAPI.js")(app, offersRepository,conversationsRepository)
 require("./routes/api/usersAPI.js")(app, usersRepository)
 
 
