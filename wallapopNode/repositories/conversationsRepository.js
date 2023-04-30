@@ -5,6 +5,7 @@ module.exports = {
         this.mongoClient = mongoClient;
         this.app = app;
     },
+
     findConversation: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
