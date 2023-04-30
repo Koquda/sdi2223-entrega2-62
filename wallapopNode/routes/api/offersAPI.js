@@ -34,33 +34,56 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         let message = req.body.message;
         let offerID = req.params.id;
         if (user == null) {
-            return res.status(401).json("Error occurred while user authentication process");
+            return res.status(401).json({error:"Error occurred while user authentication process"});
         }
 
         if (!message || message == "") {
-            return res.status(400).json("The message cannot be empty");
+            return res.status(400).json({error:"The message cannot be empty"});
         }
 
         let filter = {_id: ObjectId(offerID)}
         offersRepository.findOfferOwner(filter).then(offer => {
             let offerOwner = offer.author;
 
-            if (user === offerOwner) {
-               return  res.status(403).json("You cant start a conversation on your own offer");
-            }
+            filter = {ownerID:offerOwner, offerID:offerID}
+            conversationsRepository.findAllConversationFilter(filter).then(conversations => {
+                    if(conversations.length == 0){
+                        if (user === offerOwner) {
+                            return  res.status(403).json({error:"You cant start a conversation on your own offer"});
+                        }else{
+                            let newMessage = {
+                                userID: user,
+                                ownerID: offerOwner,
+                                offerID: offerID,
+                                message: message,
+                                date: new Date().toLocaleString(),
+                                read: false
+                            }
 
-            let newMessage = {
-                userID: user,
-                ownerID: offerOwner,
-                offerID: offerID,
-                message: message,
-                date: new Date().toLocaleString(),
-                read: false
-            }
+                            conversationsRepository.insertConversation(newMessage)
 
-            conversationsRepository.insertConversation(newMessage)
+                            return res.status(201).json({ message: "Message created successfully" });
+                        }
+                    }else{
+                        let newMessage = {
+                            userID: user,
+                            ownerID: offerOwner,
+                            offerID: offerID,
+                            message: message,
+                            date: new Date().toLocaleString(),
+                            read: false
+                        }
 
-            res.status(201).json({ message: "Message created successfully" });
+                        conversationsRepository.insertConversation(newMessage)
+
+                        return res.status(201).json({ message: "Message created successfully" });
+                    }
+
+            })
+
+
+
+
 
         });
 

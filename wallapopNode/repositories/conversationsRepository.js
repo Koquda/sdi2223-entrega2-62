@@ -5,6 +5,7 @@ module.exports = {
         this.mongoClient = mongoClient;
         this.app = app;
     },
+
     findConversation: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
@@ -12,6 +13,38 @@ module.exports = {
             const collectionName = 'conversations';
             const conversationsCollection = database.collection(collectionName);
             const conversation = await conversationsCollection.findOne(filter, options);
+            return conversation;
+        } catch (error) {
+            throw (error);
+        }
+    },
+    findAllConversationFilter: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const conversation = await conversationsCollection.find(filter,options).toArray()
+
+            return conversation;
+        } catch (error) {
+            throw (error);
+        }
+    },
+    findAllConversationGroupOfferId: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const conversation = await conversationsCollection.find(filter,options).toArray()
+
+            const pipeline = [
+                { $match: filter }, // opcional, si desea filtrar documentos
+                { $group: { _id: "$offerID", conversations: { $push: "$$ROOT" } } } // agrupa por offerID
+            ];
+
+            const conversations = await conversationsCollection.aggregate(pipeline, options).toArray();
             return conversation;
         } catch (error) {
             throw (error);
