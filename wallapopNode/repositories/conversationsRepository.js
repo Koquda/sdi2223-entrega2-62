@@ -41,11 +41,11 @@ module.exports = {
 
             const pipeline = [
                 { $match: filter }, // opcional, si desea filtrar documentos
-                { $group: { _id: "$offerID", conversations: { $push: "$$ROOT" } } } // agrupa por offerID
+                { $group: { _id: "$offerID", messages: { $push: "$$ROOT" } } } // agrupa por offerID
             ];
 
             const conversations = await conversationsCollection.aggregate(pipeline, options).toArray();
-            return conversation;
+            return conversations;
         } catch (error) {
             throw (error);
         }
