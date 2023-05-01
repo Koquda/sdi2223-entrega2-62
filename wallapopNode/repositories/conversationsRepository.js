@@ -73,5 +73,18 @@ module.exports = {
         } catch (error) {
             throw (error);
         }
+    },deleteConversations: async function (filter) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("wallapopDB");
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            // Eliminar la conversación y sus mensajes relacionados
+            const result = await conversationsCollection.deleteMany(filter);
+
+            return result.deletedCount;
+        } catch (error) {
+            throw (error);
+        }
     }
     };
