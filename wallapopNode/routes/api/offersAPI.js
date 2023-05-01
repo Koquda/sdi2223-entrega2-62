@@ -86,13 +86,41 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
 
         });
-
-
-
-
     })
 
+    app.get("/api/offers/:id/conversation", function (req, res) {
+        let user = getSessionUser(req);
+        let offerID = req.params.id;
+        if (user == null) {
+            return res.status(401).json("Error occurred while user authentication process");
+        }
+        let filter = {
+            offerID: offerID
+        }
+        conversationsRepository.findAllConversationFilter(filter).then(messages => {
+            res.status(200);
+            res.send({messages: messages})
+        }).catch(error => {
+            res.status(500);
+            res.json({ error: "Se ha producido un error al recuperar los mensajes." })
+        });
+    })
 
+    app.get("/api/offers/conversations", function (req, res) {
+        let user = getSessionUser(req);
+        if (user == null) {
+            return res.status(401).json("Error occurred while user authentication process");
+        }
+
+        let filter = { userID: user }
+        conversationsRepository.findAllConversationGroupOfferId(filter).then(messages => {
+            res.status(200);
+            res.send({conversations: messages})
+        }).catch(error => {
+            res.status(500);
+            res.json({ error: "Se ha producido un error al recuperar las conversaciones." })
+        });
+    })
 }
 
 
