@@ -37,7 +37,6 @@ module.exports = {
             const database = client.db("wallapopDB");
             const collectionName = 'conversations';
             const conversationsCollection = database.collection(collectionName);
-            const conversation = await conversationsCollection.find(filter,options).toArray()
 
             const pipeline = [
                 { $match: filter }, // opcional, si desea filtrar documentos

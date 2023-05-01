@@ -93,16 +93,37 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         if (user == null) {
             return res.status(401).json("Error occurred while user authentication process");
         }
-        let filter = {
-            offerID: offerID
-        }
-        conversationsRepository.findAllConversationFilter(filter).then(messages => {
-            res.status(200);
-            res.send({messages: messages})
-        }).catch(error => {
-            res.status(500);
-            res.json({error: "Se ha producido un error al recuperar los mensajes."})
-        });
+        let filter = {}
+
+        offersRepository.findOfferOwner({author:user}).then(offer => {
+            if (offer.author == user){
+                filter={
+                    offerID: offerID,
+                    ownerID:user
+                }
+                conversationsRepository.findAllConversationFilter(filter).then(messages => {
+                    res.status(200);
+                    res.send({messages: messages})
+                }).catch(error => {
+                    res.status(500);
+                    res.json({error: "Se ha producido un error al recuperar los mensajes."})
+                });
+            }else{
+                filter = {
+                    offerID: offerID,
+                    userID:user
+                }
+                conversationsRepository.findAllConversationFilter(filter).then(messages => {
+                    res.status(200);
+                    res.send({messages: messages})
+                }).catch(error => {
+                    res.status(500);
+                    res.json({error: "Se ha producido un error al recuperar los mensajes."})
+                });
+            }
+        })
+
+
     })
 
     app.get("/api/offers/conversations", function (req, res) {
@@ -111,7 +132,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
             return res.status(401).json("Error occurred while user authentication process");
         }
 
-        let filter = {userID: user}
+        let filter = {$or: [{userID: user}, {ownerID: user}]}
         conversationsRepository.findAllConversationGroupOfferId(filter).then(messages => {
             res.status(200);
             res.send({conversations: messages})
