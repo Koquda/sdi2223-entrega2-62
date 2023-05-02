@@ -95,7 +95,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         }
         let filter = {}
 
-        offersRepository.findOfferOwner({author:user}).then(offer => {
+        offersRepository.findOfferOwner({_id:ObjectId(offerID)}).then(offer => {
             if (offer.author == user){
                 filter={
                     offerID: offerID,
