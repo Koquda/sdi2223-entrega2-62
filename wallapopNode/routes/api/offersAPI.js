@@ -29,60 +29,59 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         });
     })
 
-    app.post("/api/offers/:id/mensajes", function (req, res) {
+    app.post("/api/offers/:id/messages", function (req, res) {
         let user = getSessionUser(req);
         let message = req.body.message;
         let offerID = req.params.id;
         if (user == null) {
-            return res.status(401).json({error:"Error occurred while user authentication process"});
+            return res.status(401).json({error: "Error occurred while user authentication process"});
         }
 
         if (!message || message == "") {
-            return res.status(400).json({error:"The message cannot be empty"});
+            return res.status(400).json({error: "The message cannot be empty"});
         }
 
         let filter = {_id: ObjectId(offerID)}
         offersRepository.findOfferOwner(filter).then(offer => {
             let offerOwner = offer.author;
 
-            filter = {ownerID:offerOwner, offerID:offerID}
+            filter = {ownerID: offerOwner, offerID: offerID}
             conversationsRepository.findAllConversationFilter(filter).then(conversations => {
-                    if(conversations.length == 0){
-                        if (user === offerOwner) {
-                            return  res.status(403).json({error:"You cant start a conversation on your own offer"});
-                        }else{
-                            let newMessage = {
-                                userID: user,
-                                ownerID: offerOwner,
-                                offerID: offerID,
-                                message: message,
-                                date: new Date().toLocaleString(),
-                                read: false
-                            }
-
-                            conversationsRepository.insertConversation(newMessage)
-
-                            return res.status(201).json({ message: "Message created successfully" });
-                        }
-                    }else{
+                if (conversations.length == 0) {
+                    if (user === offerOwner) {
+                        return res.status(403).json({error: "You cant start a conversation on your own offer"});
+                    } else {
                         let newMessage = {
                             userID: user,
                             ownerID: offerOwner,
                             offerID: offerID,
                             message: message,
                             date: new Date().toLocaleString(),
-                            read: false
+                            read: false,
+                            sentBy: user
                         }
 
                         conversationsRepository.insertConversation(newMessage)
 
-                        return res.status(201).json({ message: "Message created successfully" });
+                        return res.status(201).json({message: "Message created successfully"});
+                    }
+                } else {
+                    let newMessage = {
+                        userID: conversations[0].userID,
+                        ownerID: offerOwner,
+                        offerID: offerID,
+                        message: message,
+                        date: new Date().toLocaleString(),
+                        read: false,
+                        sentBy: user
                     }
 
+                    conversationsRepository.insertConversation(newMessage)
+
+                    return res.status(201).json({message: "Message created successfully"});
+                }
+
             })
-
-
-
 
 
         });
@@ -94,16 +93,37 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         if (user == null) {
             return res.status(401).json("Error occurred while user authentication process");
         }
-        let filter = {
-            offerID: offerID
-        }
-        conversationsRepository.findAllConversationFilter(filter).then(messages => {
-            res.status(200);
-            res.send({messages: messages})
-        }).catch(error => {
-            res.status(500);
-            res.json({ error: "Se ha producido un error al recuperar los mensajes." })
-        });
+        let filter = {}
+
+        offersRepository.findOfferOwner({author:user}).then(offer => {
+            if (offer.author == user){
+                filter={
+                    offerID: offerID,
+                    ownerID:user
+                }
+                conversationsRepository.findAllConversationFilter(filter).then(messages => {
+                    res.status(200);
+                    res.send({messages: messages})
+                }).catch(error => {
+                    res.status(500);
+                    res.json({error: "Se ha producido un error al recuperar los mensajes."})
+                });
+            }else{
+                filter = {
+                    offerID: offerID,
+                    userID:user
+                }
+                conversationsRepository.findAllConversationFilter(filter).then(messages => {
+                    res.status(200);
+                    res.send({messages: messages})
+                }).catch(error => {
+                    res.status(500);
+                    res.json({error: "Se ha producido un error al recuperar los mensajes."})
+                });
+            }
+        })
+
+
     })
 
     app.get("/api/offers/conversations", function (req, res) {
@@ -112,15 +132,44 @@ module.exports = function (app, offersRepository, conversationsRepository) {
             return res.status(401).json("Error occurred while user authentication process");
         }
 
-        let filter = { userID: user }
+        let filter = {$or: [{userID: user}, {ownerID: user}]}
         conversationsRepository.findAllConversationGroupOfferId(filter).then(messages => {
             res.status(200);
             res.send({conversations: messages})
         }).catch(error => {
             res.status(500);
-            res.json({ error: "Se ha producido un error al recuperar las conversaciones." })
+            res.json({error: "Se ha producido un error al recuperar las conversaciones."})
         });
     })
+
+    app.delete("/api/offers/delete/:id", function (req, res) {
+        let user = getSessionUser(req);
+        let conversationID = req.params.id;
+        if (user == null) {
+            return res.status(401).json("Error occurred while user authentication process");
+        }
+        let filter = {_id: ObjectId(conversationID)}
+
+        conversationsRepository.findConversation(filter).then(conversation => {
+
+            if (user != conversation.userID && user != conversation.ownerID) {
+                return res.status(403).json({error: "You cant remove a conversation that you are not part of"});
+            } else {
+                conversationsRepository.deleteConversations({
+                    userID: conversation.userID,
+                    ownerID: conversation.ownerID,
+                    offerID: conversation.offerID
+                }).then(() => {
+
+                    return res.status(200).json({message: "Conversation removed"})
+
+                })
+
+            }
+        })
+    })
+
+
 }
 
 
