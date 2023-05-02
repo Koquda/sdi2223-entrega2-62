@@ -91,11 +91,14 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         let user = getSessionUser(req);
         let offerID = req.params.id;
         if (user == null) {
-            return res.status(401).json("Error occurred while user authentication process");
+            return res.status(403).json({error: "Error occurred while user authentication process"});
         }
         let filter = {}
 
         offersRepository.findOfferOwner({_id:ObjectId(offerID)}).then(offer => {
+            if (offer == null){
+                return res.status(404).json({error:"Offer not found"});
+            }
             if (offer.author == user){
                 filter={
                     offerID: offerID,
@@ -121,6 +124,8 @@ module.exports = function (app, offersRepository, conversationsRepository) {
                     res.json({error: "Se ha producido un error al recuperar los mensajes."})
                 });
             }
+        }).catch(error =>{
+            return res.status(404).json({error:"Offer not found"});
         })
 
 
@@ -134,6 +139,10 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
         let filter = {$or: [{userID: user}, {ownerID: user}]}
         conversationsRepository.findAllConversationGroupOfferId(filter).then(messages => {
+            if(messages == null){
+                return res.status(404).json({error:"Conversations not found"});
+            }
+
             res.status(200);
             res.send({conversations: messages})
         }).catch(error => {
@@ -151,6 +160,9 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         let filter = {_id: ObjectId(conversationID)}
 
         conversationsRepository.findConversation(filter).then(conversation => {
+            if(conversation == null){
+                return res.status(404).json({error:"Conversation not found"});
+            }
 
             if (user != conversation.userID && user != conversation.ownerID) {
                 return res.status(403).json({error: "You cant remove a conversation that you are not part of"});
