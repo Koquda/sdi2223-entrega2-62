@@ -1,0 +1,62 @@
+<div id="widget-conversation">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Author of message</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+        <tbody id="messagesTableBody"></tbody>
+    </table>
+
+    <div class="form-group">
+        <label class="control-label col-sm-2" for="message">Message:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="message"
+                   placeholder="Write your message here" id="message" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" id="button-send-message">Send</button>
+        </div>
+    </div>
+</div>
+<script>
+    setInterval(function() {
+        loadMessages(messagesOffer);
+    }, 10000);
+    $("#button-send-message").click(() => {
+        $.ajax({
+            url: URLbase + "offers/" + messagesOffer + "/messages",
+            type: "POST",
+            data: {
+                message: $("#message").val(),
+            },
+            dataType: "json",
+            headers: {"token": token},
+            success: function success(response) {
+                loadMessages(messagesOffer)
+            },
+            error: (error) => {
+                $("#widget-login").prepend("<div class='alert alert-danger'>Usuario no encontrado</div>")
+            }
+        })
+    })
+    function updateMessagesTable(messages) {
+        $("#messagesTableBody").empty();
+        for (i = 0; i < messages.length; i++) {
+            $("#messagesTableBody").append(
+                "<tr id=" + messages[i]._id + ">" +
+                "<td>" + messages[i].sentBy + "</td>" +
+                "<td>" + messages[i].message + "</td>" +
+                "<td>" + messages[i].date + "</td>" +
+                "<td>" +
+                "</td>" +
+                "</tr>");
+        }
+    }
+    updateMessagesTable(messages)
+</script>

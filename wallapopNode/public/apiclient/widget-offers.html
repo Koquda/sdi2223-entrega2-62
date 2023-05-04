@@ -1,0 +1,78 @@
+<div id="widget-songs" >
+    <button class="btn" onclick="loadOffers()" >Actualizar</button>
+    <button class="btn" onclick="loadConversationsWidget()" >Conversations</button>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Details</th>
+            <th>Price</th>
+            <th>Date</th>
+            <th>Seller</th>
+            <th>Conversation</th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+        <tbody id="offersTableBody"></tbody>
+    </table>
+    <div id="messagesDiv"></div>
+
+</div>
+<script>
+    var offers;
+    var messages;
+    var messagesOffer
+    function loadOffers() {
+        $.ajax({
+            url: URLbase + "offers",
+            type: "GET",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (response) {
+                offers = response.offers;
+                updateOffersTable(offers);
+            },
+            error: function (error) {
+                $("#main-container").load("widget-login.html");
+            }
+        });
+    }
+    function loadMessages(offerId) {
+        messagesOffer = offerId
+        $.ajax({
+            url: URLbase + "offers/" + offerId + "/conversation",
+            type: "GET",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (response) {
+                messages = response.messages;
+                $("#main-container").load("widget-messages.html")
+            },
+            error: function (error) {
+                $("#main-container").load("widget-login.html");
+            }
+        });
+    }
+    function loadConversationsWidget() {
+        $("#main-container").load("widget-conversations.html")
+    }
+    function updateOffersTable(offers) {
+        $("#offersTableBody").empty();
+        for (i = 0; i < offers.length; i++) {
+            $("#offersTableBody").append(
+                "<tr id=" + offers[i]._id + ">" +
+                "<td>" + offers[i].title + "</td>" +
+                "<td>" + offers[i].details + "</td>" +
+                "<td>" + offers[i].price + "</td>" +
+                "<td>" + offers[i].date +  "</td>" +
+                "<td>" + offers[i].author + "</td>" +
+                "<td><a onclick=loadMessages('" + offers[i]._id + "')>Conversation</a><br></td>" +
+                "<td>" +
+                "</td>" +
+                "</tr>");
+        }
+    }
+    loadOffers();
+</script>
