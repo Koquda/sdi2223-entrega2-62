@@ -44,6 +44,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         let filter = {_id: ObjectId(offerID)}
         offersRepository.findOfferOwner(filter).then(offer => {
             let offerOwner = offer.author;
+            const offerTitle =  offer.title
 
             filter = {ownerID: offerOwner, offerID: offerID}
             conversationsRepository.findAllConversationFilter(filter).then(conversations => {
@@ -58,7 +59,8 @@ module.exports = function (app, offersRepository, conversationsRepository) {
                             message: message,
                             date: new Date().toLocaleString(),
                             read: false,
-                            sentBy: user
+                            sentBy: user,
+                            offerTitle: offerTitle
                         }
 
                         conversationsRepository.insertConversation(newMessage)
@@ -73,7 +75,8 @@ module.exports = function (app, offersRepository, conversationsRepository) {
                         message: message,
                         date: new Date().toLocaleString(),
                         read: false,
-                        sentBy: user
+                        sentBy: user,
+                        offerTitle: offerTitle
                     }
 
                     conversationsRepository.insertConversation(newMessage)
@@ -142,7 +145,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         });
     })
 
-    app.delete("/api/offers/delete/:id", function (req, res) {
+    app.delete("/api/offers/conversation/delete/:id", function (req, res) {
         let user = getSessionUser(req);
         let conversationID = req.params.id;
         if (user == null) {
@@ -151,6 +154,9 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         let filter = {_id: ObjectId(conversationID)}
 
         conversationsRepository.findConversation(filter).then(conversation => {
+            if(conversation == null){
+                return res.status(404).json({error:"Conversation not found"});
+            }
 
             if (user != conversation.userID && user != conversation.ownerID) {
                 return res.status(403).json({error: "You cant remove a conversation that you are not part of"});

@@ -27,7 +27,7 @@
 <script>
     setInterval(function() {
         loadMessages(messagesOffer);
-    }, 1000);
+    }, 10000);
     $("#button-send-message").click(() => {
         $.ajax({
             url: URLbase + "offers/" + messagesOffer + "/messages",
