@@ -1,0 +1,56 @@
+<div id="widget-songs" >
+    <button class="btn" onclick="loadConversations()" >Actualizar</button>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Details</th>
+            <th>Price</th>
+            <th>Date</th>
+            <th>Seller</th>
+            <th>Conversation</th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+        <tbody id="ConversationsTableBody"></tbody>
+    </table>
+    <div id="messagesDiv"></div>
+
+</div>
+<script>
+    var conversations;
+    function loadConversations() {
+        $.ajax({
+            url: URLbase + "offers/conversations",
+            type: "GET",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (response) {
+                conversations = response.conversations;
+                console.log(conversations)
+                updateConversationsTable(conversations);
+            },
+            error: function (error) {
+                $("#main-container").load("widget-login.html");
+            }
+        });
+    }
+
+    function updateConversationsTable(conversations) {
+        $("#ConversationsTableBody").empty();
+        for (i = 0; i < conversations.length; i++) {
+            $("#ConversationsTableBody").append(
+                "<tr id=" + conversations[i]._id + ">" +
+                "<td>" + conversations[i].title + "</td>" +
+                "<td>" + conversations[i].details + "</td>" +
+                "<td>" + conversations[i].price + "</td>" +
+                "<td>" + conversations[i].date +  "</td>" +
+                "<td>" + conversations[i].author + "</td>" +
+                "<td>" +
+                "</td>" +
+                "</tr>");
+        }
+    }
+    loadConversations();
+</script>
