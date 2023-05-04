@@ -184,6 +184,28 @@ module.exports = function (app, offersRepository, conversationsRepository) {
         })
     })
 
+    app.post("/api/offers/:id/markRead", function(req, res){
+        let user = getSessionUser(req);
+        let conversationID = req.params.id;
+
+        let filter={_id:ObjectId(conversationID)}
+        conversationsRepository.findConversation(filter,{}).then(conversation => {
+            if(conversation == null){
+                return res.status(404).json({error:"Conversation not found"});
+            }
+
+            if (user != conversation.userID && user != conversation.ownerID) {
+                return res.status(403).json({error: "You cant mark as read a conversation that you are not part of"});
+            }
+
+            conversation.read = true;
+            conversationsRepository.updateConversation(conversation,filter,{}).then(()=>{
+                return res.status(200).json({message: "Message read"})
+            } )
+        })
+
+    })
+
 
 }
 
