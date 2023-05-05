@@ -1,4 +1,4 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test62.pageobjects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

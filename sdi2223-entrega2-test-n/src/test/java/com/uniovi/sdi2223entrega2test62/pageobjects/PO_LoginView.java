@@ -1,4 +1,4 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test62.pageobjects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -28,6 +28,6 @@ public class PO_LoginView extends PO_NavView {
 
 	static public void logout(WebDriver driver, String checkKeyText) {
 		String loginText = PO_HomeView.getP().getString(checkKeyText, PO_Properties.getSPANISH());
-		PO_PrivateView.clickOption(driver, "logout", "text", loginText);
+		clickOption(driver, "logout", "text", loginText);
 	}
 }

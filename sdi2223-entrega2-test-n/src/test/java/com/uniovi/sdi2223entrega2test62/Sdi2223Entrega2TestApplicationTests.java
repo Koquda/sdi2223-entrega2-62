@@ -1,8 +1,9 @@
-package com.uniovi.sdi2223entrega2test.n;
+package com.uniovi.sdi2223entrega2test62;
 
-import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_HomeView;
-import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_SignUpView;
-import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_View;
+import com.uniovi.sdi2223entrega2test62.mongo.MongoDB;
+import com.uniovi.sdi2223entrega2test62.pageobjects.PO_HomeView;
+import com.uniovi.sdi2223entrega2test62.pageobjects.PO_SignUpView;
+import com.uniovi.sdi2223entrega2test62.pageobjects.PO_View;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -17,13 +18,13 @@ import java.util.List;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    //static String Geckodriver = "C:\\Path\\geckodriver-v0.30.0-win64.exe";
-    static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
-    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
-//static String Geckodriver = "/Users/USUARIO/selenium/geckodriver-v0.30.0-macos";
+    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+    //static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
     static String URL = "http://localhost:8080";
+    static MongoDB mongoDB = new MongoDB();
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
@@ -35,6 +36,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @BeforeEach
     public void setUp() {
         driver.navigate().to(URL);
+        mongoDB.resetMongo();
     }
 
     //Después de cada prueba se borran las cookies del navegador
