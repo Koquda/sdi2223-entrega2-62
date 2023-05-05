@@ -2,10 +2,7 @@ package com.uniovi.sdi2223entrega2test62;
 
 
 import com.uniovi.sdi2223entrega2test62.mongo.MongoDB;
-import com.uniovi.sdi2223entrega2test62.pageobjects.PO_HomeView;
-import com.uniovi.sdi2223entrega2test62.pageobjects.PO_LoginView;
-import com.uniovi.sdi2223entrega2test62.pageobjects.PO_SignUpView;
-import com.uniovi.sdi2223entrega2test62.pageobjects.PO_View;
+import com.uniovi.sdi2223entrega2test62.pageobjects.*;
 import com.uniovi.sdi2223entrega2test62.util.SeleniumUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -25,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-//    static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+   // static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -232,6 +229,55 @@ class Sdi2223Entrega2TestApplicationTests {
                 PO_View.getTimeout());
         // Comprobar length
         assertEquals(16, markList.size());
+
+    }
+
+    /**
+     * [Prueba16] Ir al formulario de alta de oferta, rellenarla con datos válidos y pulsar el botón Submit.
+     * Comprobar que la oferta sale en el listado de ofertas de dicho usuario.
+     */
+    @Test
+    @Order(16)
+    public void PR16() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        List<WebElement> result = PO_View.checkElementBy(driver,"free","/html/body/div/div[2]/a");
+        result.get(0).click();
+
+        PO_PrivateView.fillFormAddOffer(driver,"Titulo test16","test16","5.50",false);
+
+        //Comprobamos que se añade la oferta
+        String checkText = "Titulo test16";
+        List<WebElement> offerTitle = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, offerTitle.get(0).getText());
+
+    }
+
+    /**
+     * [Prueba17] Ir al formulario de alta de oferta, rellenarla con datos inválidos (campo título vacío y precio
+     * en negativo) y pulsar el botón Submit. Comprobar que se muestra el mensaje de campo inválido.
+     */
+    @Test
+    @Order(17)
+    public void PR17() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        List<WebElement> result = PO_View.checkElementBy(driver,"free","/html/body/div/div[2]/a");
+        result.get(0).click();
+
+        PO_PrivateView.fillFormAddOffer(driver,"","test17","-5.50",false);
+
+        //Comprobamos que se notifican los errores
+        String checkText = "Title cant be empty, Price must be a positive number";
+        List<WebElement> errorsResult = PO_View.checkElementBy(driver, "class", "alert alert-danger ");
+
+        Assertions.assertEquals(checkText, errorsResult.get(0).getText());
 
     }
 
