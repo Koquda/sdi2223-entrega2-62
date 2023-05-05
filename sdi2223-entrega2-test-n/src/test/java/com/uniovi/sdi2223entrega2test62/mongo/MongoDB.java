@@ -219,14 +219,14 @@ public class MongoDB {
         Random rand = new Random();
 
         for (int userNum = 1; userNum <= 10; userNum++) {
-            String userEmail = "user" + userNum + "@email.com";
+            String userEmail = (userNum < 10)?"user0" + userNum + "@email.com":"user" + userNum + "@email.com";
 
             for (int offerNum = 1; offerNum <= 10; offerNum++) {
-                String offerTitle = "offer" + offerNum + "User" + userNum;
+                String offerTitle =   "offer" + offerNum + "User" + userNum;
                 String offerDetails = "offer" + offerNum + "User" + userNum + "Details";
                 String offerDate = String.format("%02d/05/2023", offerNum);
                 int offerPrice = rand.nextInt(20) + 1; // precio aleatorio entre 1 y 20
-                boolean isHighlighted = (offerNum % 10 == 0); // resaltar cada veinteavo elemento
+                boolean isHighlighted = false; // resaltar cada veinteavo elemento
 
                 Document offer = new Document()
                         .append("title", offerTitle)

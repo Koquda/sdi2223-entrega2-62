@@ -281,6 +281,76 @@ class Sdi2223Entrega2TestApplicationTests {
 
     }
 
+    /**
+     * [Prueba18] Mostrar el listado de ofertas para dicho usuario y comprobar que se muestran todas las que
+     * existen para este usuario.
+     */
+    @Test
+    @Order(18)
+    public void PR18() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+
+        // Comprobamos que la primera página este llena (5 ofertas)
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
+        Assertions.assertEquals(5, offers.size());
+
+        // Pasamos a la pagina 2
+        PO_View.checkElementBy(driver,"free","//*[@id=\"pi-2\"]/a").get(0).click();
+
+        // Comprobamos que segunda página este llena (5 ofertas)
+        List<WebElement> offers2 = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
+        Assertions.assertEquals(5, offers.size());
+
+    }
+
+    /**
+     * [Prueba19] Ir a la lista de ofertas, borrar la primera oferta de la lista, comprobar que la lista se actualiza
+     *  y que la oferta desaparece.
+     */
+    @Test
+    @Order(19)
+    public void PR19() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        // Borramos la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/table[1]/tbody/tr[1]/td[5]/a").get(0).click();
+
+        //Comprobamos que se borra
+        String checkText = "offer10User1Details";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+
+
+    }
+
+    /**
+     * Prueba20] Ir a la lista de ofertas, borrar la última oferta de la lista, comprobar que la lista se actualiza
+     * y que la oferta desaparece.
+     */
+    @Test
+    @Order(20)
+    public void PR20() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        // Borramos la ultima oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/table[1]/tbody/tr[5]/td[5]/a").get(0).click();
+
+        //Comprobamos que se borra
+        String checkText = "offer4User1Details";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+
+
+    }
+
     @Test
     @Order(38)
     public void PR38() {
