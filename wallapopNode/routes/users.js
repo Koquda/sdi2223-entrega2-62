@@ -69,10 +69,14 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
     })
     // Post for signup
     app.post('/users/signup', [
+        validator.body('email').notEmpty().withMessage('Email is required'),
+        validator.body('name').notEmpty().withMessage('Name is required'),
+        validator.body('surnames').notEmpty().withMessage('Surnames are required'),
+        validator.body('birthdate').custom(isDateValid),
         validator.body('password').notEmpty().withMessage('Password is required'),
         validator.body('confirmPassword').notEmpty().withMessage('Confirm password is required'),
-        validator.body('password').custom(passwordMatches),
-        validator.body('birthdate').custom(isDateValid)
+        validator.body('password').custom(passwordMatches)
+
     ], function (req, res) {
         let date = new Date();
         let dateStr = date.toLocaleDateString();
@@ -234,9 +238,11 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
 
         logsRepository.insertLog(log);
 
-        req.session = null;
         req.session.wallet=null;
-        res.render("login.twig", {session: req.session})
+        req.session = null;
+        res.clearCookie('connect.sid');
+
+        res.redirect("/users/login");
     })
     app.post('/users/deleteSelected', function (req, res) {
         let selectedUsers = req.body.selectedUsers;
