@@ -1,10 +1,12 @@
 package com.uniovi.sdi2223entrega2test62;
 
+
 import com.uniovi.sdi2223entrega2test62.mongo.MongoDB;
 import com.uniovi.sdi2223entrega2test62.pageobjects.PO_HomeView;
 import com.uniovi.sdi2223entrega2test62.pageobjects.PO_LoginView;
 import com.uniovi.sdi2223entrega2test62.pageobjects.PO_SignUpView;
 import com.uniovi.sdi2223entrega2test62.pageobjects.PO_View;
+import com.uniovi.sdi2223entrega2test62.util.SeleniumUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -18,11 +20,13 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    //static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-    static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+//    static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -209,15 +213,26 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(0, result.size());
     }
 
-
-    /* Ejemplos de pruebas de llamada a una API-REST */
-    /* ---- Probamos a obtener lista de canciones sin token ---- */
+// TODO no funciona
     @Test
     @Order(11)
     public void PR11() {
-        final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
-        Response response = RestAssured.get(RestAssuredURL);
-        Assertions.assertEquals(403, response.getStatusCode());
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Obtener la lista de usuarios
+        List<WebElement> markList = SeleniumUtils.waitLoadElementsBy(driver, "free", "/html/body/div[1]/form/div[1]/table/tbody/tr",
+                PO_View.getTimeout());
+        // Comprobar length
+        assertEquals(16, markList.size());
+
     }
 
     @Test

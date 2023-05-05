@@ -76,22 +76,16 @@ public class SeleniumUtils {
 	static public List<WebElement> waitLoadElementsBy(WebDriver driver, String criterio, String text, int timeout)
 	{
 		String searchCriterio;
-		switch (criterio) {
-			case "id":
-				searchCriterio = "//*[contains(@id,'" + text + "')]";
-				break;
-			case "class":
-				searchCriterio = "//*[contains(@class,'" + text + "')]";
-				break;
-			case "text":
-				searchCriterio = "//*[contains(text(),'" + text + "')]";
-				break;
-			case "free":
-				searchCriterio = text;
-				break;
-			default:
-				searchCriterio = "//*[contains(" + criterio + ",'" + text + "')]";
-				break;
+		if (criterio.equals("id")) {
+			searchCriterio = "//*[contains(@id,'" + text + "')]";
+		} else if (criterio.equals("class")) {
+			searchCriterio = "//*[contains(@class,'" + text + "')]";
+		} else if (criterio.equals("text")) {
+			searchCriterio = "//*[contains(text(),'" + text + "')]";
+		} else if (criterio.equals("free")) {
+			searchCriterio = text;
+		} else {
+			searchCriterio = "//*[contains(" + criterio + ",'" + text + "')]";
 		}
 
 		return waitLoadElementsByXpath(driver, searchCriterio, timeout);
