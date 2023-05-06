@@ -204,6 +204,7 @@ module.exports = function(app, offersRepository, usersRepository) {
         });
     });
 
+
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
         let shop = {
@@ -275,9 +276,9 @@ module.exports = function(app, offersRepository, usersRepository) {
                                         res.send("An error occurred while updating the featured offer" + error);
                                     });
 
-                                    }).catch(error => {
-                                        res.send("An error occurred while updating the offer" + error);
-                                    });
+                                }).catch(error => {
+                                    res.send("An error occurred while updating the offer" + error);
+                                });
                             }
                         }).catch(error => {
                             res.send("An error occurred while buying the offer" + error);
@@ -291,6 +292,7 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("An error occurred while searching the offer" + error);
         });
     });
+
     app.get('/purchases', function (req, res) {
         let filter = {user: req.session.user};
         let options = {projection: {_id: 0, offerId: 1}};
