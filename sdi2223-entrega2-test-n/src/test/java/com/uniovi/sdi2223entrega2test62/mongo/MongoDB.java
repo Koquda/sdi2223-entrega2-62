@@ -212,7 +212,7 @@ public class MongoDB {
                 .append("surnames", "surnamesUser15")
                 .append("birthdate", "16-7-1993")
                 .append("password", "6fabd6ea6f1518592b7348d84a51ce97b87e67902aa5a9f86beea34cd39a6b4a")
-                .append("wallet", 100)
+                .append("wallet", 10)
                 .append("role", "user");
         usuarios.insertOne(user15);
     }

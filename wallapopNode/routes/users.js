@@ -35,7 +35,7 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
     }
 
     // Lists users
-    app.get('/users', function (req, res) {
+    app.get('/users/list', function (req, res) {
         // Find all users in the database
         let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -209,7 +209,7 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
                 logsRepository.insertLog(log);
 
                 if (user.role === "admin") {
-                    res.redirect("/users")
+                    res.redirect("/users/list")
                 } else {
                     res.redirect("/offers/myOffers");
                 }

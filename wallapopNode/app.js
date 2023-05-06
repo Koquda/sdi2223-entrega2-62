@@ -112,6 +112,7 @@ app.use("/purchases", userSessionRouter);
 app.use("/offers/buy", userSessionRouter);
 app.use("/offers/myOffers", userSessionRouter);
 app.use("/shop/", userSessionRouter);
+app.use("/api/offers/conversations",userSessionRouter)
 
 
 
@@ -120,6 +121,7 @@ app.use("/api/offers", userTokenRouter);
 
 let logsAdminRouter = require('./routes/logsAdminRouter.js');
 app.use("/log", logsAdminRouter);
+app.use("/users/list",logsAdminRouter);
 
 let logsRepository = require('./repositories/logsRepository.js');
 logsRepository.init(app, MongoClient);
