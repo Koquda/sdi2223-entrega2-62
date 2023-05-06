@@ -29,10 +29,10 @@ module.exports = {
             throw (error);
         }
     },
-    buyOffer: function (shop, callbackFunction) {
+    buyOffer: async function (shop, callbackFunction) {
         this.mongoClient.connect(this.app.get('connectionStrings'), function (err, dbClient) {
             if (err) {
-                callbackFunction(null)
+                callbackFunction({error: err.message});
             } else {
                 const database = dbClient.db("wallapopDB");
                 const collectionName = 'purchases';

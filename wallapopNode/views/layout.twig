@@ -29,7 +29,7 @@
                 <li id="mybuy"><a href="/purchases">Purchases</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                {% if session.wallet %}
+                {% if session.wallet >= 0 %}
                     <li><a href="#"><span style="background-color: #0da790; color: white; padding: 5px 10px; border-radius: 5px;">Wallet: {{ session.wallet }}</span></a></li>
                 {% endif %}
                 {% if session.user %}
