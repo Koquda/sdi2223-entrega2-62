@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8144664d-e0f1-4da8-8d26-421b1df2e3e2" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../sdi2223-entrega2-test-n/src/test/java/com/uniovi/sdi2223entrega2test62/Sdi2223Entrega2TestApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/../sdi2223-entrega2-test-n/src/test/java/com/uniovi/sdi2223entrega2test62/Sdi2223Entrega2TestApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sdi2223-entrega2-test-n/src/test/java/com/uniovi/sdi2223entrega2test62/mongo/MongoDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/../sdi2223-entrega2-test-n/src/test/java/com/uniovi/sdi2223entrega2test62/mongo/MongoDB.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/repositories/offersRepository.js" beforeDir="false" afterPath="$PROJECT_DIR$/repositories/offersRepository.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/offers.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/offers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/layout.twig" beforeDir="false" afterPath="$PROJECT_DIR$/views/layout.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/shop.twig" beforeDir="false" afterPath="$PROJECT_DIR$/views/shop.twig" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2PNXLuJKSFmL0i4ezKBXEMQBfl7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/dani/IdeaProjects/TrabajoGrupalNode/sdi2223-entrega2-test-n",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "SDKs",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.2",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager" selected="Node.js.www">
+    <configuration name="app.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/app.js" working-dir="$PROJECT_DIR$">
+      <method v="2" />
+    </configuration>
+    <configuration name="www" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/www" working-dir="$PROJECT_DIR$/bin">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.www" />
+        <item itemvalue="Node.js.app.js" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8144664d-e0f1-4da8-8d26-421b1df2e3e2" name="Changes" comment="" />
+      <created>1683298460476</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1683298460476</updated>
+      <workItem from="1683298461578" duration="4828000" />
+      <workItem from="1683313392960" duration="1729000" />
+      <workItem from="1683315609069" duration="1208000" />
+      <workItem from="1683319099013" duration="1400000" />
+      <workItem from="1683373725820" duration="9621000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/userSessionRouter.js</url>
+          <line>3</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/users.js</url>
+          <line>160</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/logsAdminRouter.js</url>
+          <line>4</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
