@@ -49,6 +49,7 @@ public class MongoDB {
     private void deleteData() {
         getMongodb().getCollection("users").drop();
         getMongodb().getCollection("offers").drop();
+        getMongodb().getCollection("highlightedOffers").drop();
     }
 
     private void insertUsuarios() {
