@@ -251,7 +251,6 @@ module.exports = function (app, usersRepository, logsRepository, offersRepositor
             let filter = {email: selectedUsers};
             usersRepository.findUser(filter, {}).then(user => {
                 if (user != null && user.role == "user") {
-
                     usersRepository.deleteUser(filter).then(cant => {
                         offersRepository.deleteOffer({author: user.email}, {}).then(cant => {
                             res.redirect("/users");
