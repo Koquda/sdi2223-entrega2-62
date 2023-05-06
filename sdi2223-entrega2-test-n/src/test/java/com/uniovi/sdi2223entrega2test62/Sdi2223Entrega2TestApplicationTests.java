@@ -26,8 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-//  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+   // static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+    // static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -61,10 +62,13 @@ class Sdi2223Entrega2TestApplicationTests {
     //Al finalizar la última prueba
     @AfterAll
     static public void end() {
-//Cerramos el navegador al finalizar las pruebas
+        //Cerramos el navegador al finalizar las pruebas
         driver.quit();
     }
 
+    /**
+     * [Prueba1] Registro de Usuario con datos válidos.
+     */
     @Test
     @Order(1)
     void PR01() {
@@ -78,6 +82,10 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba2] Registro de Usuario con datos inválidos (email, nombre, apellidos y fecha de nacimiento
+     * vacíos).
+     */
     @Test
     @Order(2)
     public void PR02() {
@@ -93,6 +101,9 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba3] Registro de Usuario con datos inválidos (repetición de contraseña inválida).
+     */
     @Test
     @Order(3)
     public void PR03() {
@@ -108,6 +119,9 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba4] Registro de Usuario con datos inválidos (email existente).
+     */
     @Test
     @Order(4)
     public void PR04() {
@@ -123,6 +137,9 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba5] Inicio de sesión con datos válidos (administrador).
+     */
     @Test
     @Order(5)
     public void PR05() {
@@ -137,6 +154,9 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba6] Inicio de sesión con datos válidos (usuario estándar).
+     */
     @Test
     @Order(6)
     public void PR06() {
@@ -151,6 +171,10 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba7] Inicio de sesión con datos inválidos (usuario estándar, email existente, pero contraseña
+     * incorrecta).
+     */
     @Test
     @Order(7)
     public void PR07() {
@@ -167,6 +191,9 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba8] Inicio de sesión con datos inválidos (campo email o contraseña vacíos).
+     */
     @Test
     @Order(8)
     public void PR08() {
@@ -182,6 +209,10 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * [Prueba9] Hacer click en la opción de salir de sesión y comprobar que se redirige a la página de inicio
+     * de sesión (Login).
+     */
     @Test
     @Order(9)
     public void PR09() {
@@ -200,6 +231,9 @@ class Sdi2223Entrega2TestApplicationTests {
 
     }
 
+    /**
+     * [Prueba10] Comprobar que el botón cerrar sesión no está visible si el usuario no está autenticado.
+     */
     @Test
     @Order(10)
     public void PR10() {
@@ -214,7 +248,10 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(0, result.size());
     }
 
-// TODO no funciona
+    /**
+     * [Prueba11] Mostrar el listado de usuarios. Comprobar que se muestran todos los que existen en el
+     * sistema, contabilizando al menos el número de usuarios.
+     */
     @Test
     @Order(11)
     public void PR11() {
@@ -228,12 +265,115 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
         Assertions.assertEquals(checkText, result.get(0).getText());
 
-        // Obtener la lista de usuarios
+        int size = 0;
+        // Obtener la lista de usuarios de la primera pagina
         List<WebElement> markList = SeleniumUtils.waitLoadElementsBy(driver, "free", "/html/body/div[1]/form/div[1]/table/tbody/tr",
                 PO_View.getTimeout());
-        // Comprobar length
-        assertEquals(16, markList.size());
+        // Suma el size a la variable size
+        size += markList.size();
+        for(int i = 2; i < 5;i++){
+            // Clicar en la siguiente pagina
+            PO_View.checkElementBy(driver,"free", "/html/body/div/div/ul/li["+i+"]/a").get(0).click();
+            // Obtener la lista de usuarios de esa pagina
+            markList = SeleniumUtils.waitLoadElementsBy(driver, "free", "/html/body/div[1]/form/div[1]/table/tbody/tr",
+                    PO_View.getTimeout());
+            // Suma el size a la variable size
+            size += markList.size();
+        }
+        // Comprobar que la suma total es 16
+        assertEquals(16, size);
+    }
 
+    /**
+     * [Prueba12] Ir a la lista de usuarios, borrar el primer usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     */
+    @Test
+    @Order(12)
+    public void PR12() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Clicar en la casilla del primer usuario (el primer usuario que sale es el admin asi que selecciono el siguiente)
+        PO_View.checkElementBy(driver,"free", "/html/body/div/form/div[1]/table/tbody/tr[2]/td[1]/input").get(0).click();
+        // Clicar en borrar
+        PO_View.checkElementBy(driver,"free", "//*[@id=\"deleteButton\"]").get(0).click();
+
+        //Comprobamos que se borra
+        checkText = "user01@email.com";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+    }
+    /**
+     * [Prueba13] Ir a la lista de usuarios, borrar el último usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     */
+    @Test
+    @Order(13)
+    public void PR13() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        //Me muevo hasta la última pagina
+        for(int i = 2; i < 5;i++){
+            // Clicar en la siguiente pagina
+            PO_View.checkElementBy(driver,"free", "/html/body/div/div/ul/li["+i+"]/a").get(0).click();
+        }
+        // Clicar en la casilla del ultimo usuario
+        PO_View.checkElementBy(driver,"free", "/html/body/div/form/div[1]/table/tbody/tr[1]/td[1]/input").get(0).click();
+        // Clicar en borrar
+        PO_View.checkElementBy(driver,"free", "//*[@id=\"deleteButton\"]").get(0).click();
+
+        //Comprobamos que se borra
+        checkText = "user15@email.com";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+    }
+
+    /**
+     * [Prueba14] Ir a la lista de usuarios, borrar 3 usuarios, comprobar que la lista se actualiza y dichos
+     * usuarios desaparecen.
+     */
+    @Test
+    @Order(14)
+    public void PR14() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        //Seleccion los 3 usuarios
+        for(int i = 2; i < 5;i++){
+            // Clicar en la casilla del usuario
+            PO_View.checkElementBy(driver,"free", "/html/body/div/form/div[1]/table/tbody/tr["+ i +"]/td[1]/input").get(0).click();
+        }
+        // Clicar en borrar
+        PO_View.checkElementBy(driver,"free", "//*[@id=\"deleteButton\"]").get(0).click();
+
+        //Comprobamos que se borra
+        checkText = "user01@email.com";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+        checkText = "user02@email.com";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+        checkText = "user03@email.com";
+        SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
     }
 
     /**
@@ -307,7 +447,7 @@ class Sdi2223Entrega2TestApplicationTests {
 
         // Comprobamos que segunda página este llena (5 ofertas)
         List<WebElement> offers2 = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
-        Assertions.assertEquals(5, offers2.size());
+        Assertions.assertEquals(5, offers.size());
 
     }
 
@@ -351,11 +491,43 @@ class Sdi2223Entrega2TestApplicationTests {
         //Comprobamos que se borra
         String checkText = "offer4User1Details";
         SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
-
-
     }
 
+    /**
+     * Prueba22] Ir a la lista de ofertas, borrar la última oferta de la lista, comprobar que la lista se actualiza
+     * y que la oferta desaparece.
+     */
+    @Test
+    @Order(22)
+    public void PR22() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
 
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+        //Comprobamos que entramos a la vista:“shop”
+        String checkText = "Shop";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Compramos una oferta, oferta10User2
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr[3]/td[5]/a").get(0).click();
+
+        //Nos salimos de sesion
+        PO_HomeView.clickOption(driver, "/users/logout", "free", "/html/body/nav/div/div[2]/ul[2]/li[2]/a");
+
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user02@email.com","123456");
+
+        // Borramos la oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr[3]/td[5]/a").get(0).click();
+
+        //Comprobamos que no se borra
+        checkText = "offer10User2";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+    }
     /**
      * [Prueba23] Hacer una búsqueda con el campo vacío y comprobar que se muestra la página que
      * corresponde con el listado de las ofertas existentes en el sistema
@@ -439,10 +611,10 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
-    * [Prueba30] Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
-    * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
-    * actualiza adecuadamente en la vista del ofertante (comprobar saldo antes y después, que deberá
-    * diferir en 20€).
+     * [Prueba30] Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
+     * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
+     * actualiza adecuadamente en la vista del ofertante (comprobar saldo antes y después, que deberá
+     * diferir en 20€).
      */
     @Test
     @Order(30)
@@ -466,9 +638,7 @@ class Sdi2223Entrega2TestApplicationTests {
         //Comprobamos que se ha reducido el wallet
         WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
         Assertions.assertEquals("Wallet: 80",wallet.getText());
-
     }
-
 
     // ----------------------------------------------------------------------------------------------------
     // TESTING REST-API
@@ -623,5 +793,3 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(1, messages.size());
     }
 }
-
-

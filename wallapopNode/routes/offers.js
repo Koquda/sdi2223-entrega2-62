@@ -71,49 +71,49 @@ module.exports = function(app, offersRepository, usersRepository) {
         let offerToBeDeleted
 
         offersRepository.findOffer(filter, {}).then(offer => {
-           if (offer == null){
-               res.redirect("/offers/myOffers" +
-                   '?message=Error occurred while trying to get the offer.'+
-                   "&messageType=alert-danger");
-           } else {
-               offerToBeDeleted = offer
-               if (offer.author !== req.session.user){
-                   res.redirect("/offers/myOffers" +
-                       '?message=The offer you are trying to delete does not belong to you.'+
-                       "&messageType=alert-danger");
-               }
-               if (offer.purchased) {
-                   res.redirect("/offers/myOffers" +
-                       '?message=The offer you are trying to delete is already sold.'+
-                       "&messageType=alert-danger");
-               }
-               offersRepository.deleteOffer( {_id: offerId} , {}).then( result => {
-                   if (result === null || result.deletedCount === 0) {
-                       res.redirect("/offers/myOffers" +
-                           '?message=Could not eliminate the offer.'+
-                           "&messageType=alert-danger");
-                   } else {
-                       if (offerToBeDeleted.highlighted) {
-                           offersRepository.deleteHighlightedOffer({_id: offerId}, {}).then( result2 => {
-                               if (result === null || result.deletedCount === 0) {
-                                   res.redirect("/offers/myOffers" +
-                                       '?message=Could not eliminate the offer.' +
-                                       "&messageType=alert-danger");
-                               } else {
-                                   res.redirect("/offers/myOffers");
-                               }
-                           })
-                       }
-                       else {
-                           res.redirect("/offers/myOffers");
-                       }
-                   }
-               }).catch(error => {
-                   res.redirect("/offers/myOffers" +
-                       '?message=Error occurred while deleting the offer.'+
-                       "&messageType=alert-danger");
-               })
-           }
+            if (offer == null){
+                res.redirect("/offers/myOffers" +
+                    '?message=Error occurred while trying to get the offer.'+
+                    "&messageType=alert-danger");
+            } else {
+                offerToBeDeleted = offer
+                if (offer.author !== req.session.user){
+                    res.redirect("/offers/myOffers" +
+                        '?message=The offer you are trying to delete does not belong to you.'+
+                        "&messageType=alert-danger");
+                }else if (offer.purchased) {
+                    res.redirect("/offers/myOffers" +
+                        '?message=The offer you are trying to delete is already sold.'+
+                        "&messageType=alert-danger");
+                }else{
+                    offersRepository.deleteOffer( {_id: offerId} , {}).then( result => {
+                        if (result === null || result.deletedCount === 0) {
+                            res.redirect("/offers/myOffers" +
+                                '?message=Could not eliminate the offer.'+
+                                "&messageType=alert-danger");
+                        } else {
+                            if (offerToBeDeleted.highlighted) {
+                                offersRepository.deleteHighlightedOffer({_id: offerId}, {}).then( result2 => {
+                                    if (result === null || result.deletedCount === 0) {
+                                        res.redirect("/offers/myOffers" +
+                                            '?message=Could not eliminate the offer.' +
+                                            "&messageType=alert-danger");
+                                    } else {
+                                        res.redirect("/offers/myOffers");
+                                    }
+                                })
+                            }
+                            else {
+                                res.redirect("/offers/myOffers");
+                            }
+                        }
+                    }).catch(error => {
+                        res.redirect("/offers/myOffers" +
+                            '?message=Error occurred while deleting the offer.'+
+                            "&messageType=alert-danger");
+                    })
+                }
+            }
         });
     })
     app.post('/offers/add', [
@@ -250,12 +250,12 @@ module.exports = function(app, offersRepository, usersRepository) {
                                     let filter = {_id: shop.offerId};
                                     const options = {upsert: false};
                                     offersRepository.updateHighlightedOffer(newOffer, filter, options).then(() => {
-                                        usersRepository.findUser({email: req.session.user}, {}).then(user =>{
-                                            if(user == null){
+                                        usersRepository.findUser({email: req.session.user}, {}).then(user => {
+                                            if (user == null) {
                                                 res.redirect("/shop" +
                                                     "?message=Error searching user" +
                                                     "&messageType=alert-danger ");
-                                            }else{
+                                            } else {
                                                 let newUser = {
                                                     wallet: user.wallet - offer.price  // resta el precio de la oferta comprada
                                                 };
@@ -275,7 +275,6 @@ module.exports = function(app, offersRepository, usersRepository) {
                                     }).catch(error => {
                                         res.send("An error occurred while updating the featured offer" + error);
                                     });
-
                                 }).catch(error => {
                                     res.send("An error occurred while updating the offer" + error);
                                 });
