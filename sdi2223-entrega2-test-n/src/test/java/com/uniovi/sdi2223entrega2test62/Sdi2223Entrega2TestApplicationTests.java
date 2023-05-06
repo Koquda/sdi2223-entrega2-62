@@ -1,11 +1,13 @@
 package com.uniovi.sdi2223entrega2test62;
 
 
+import com.mongodb.util.JSON;
 import com.uniovi.sdi2223entrega2test62.mongo.MongoDB;
 import com.uniovi.sdi2223entrega2test62.pageobjects.*;
 import com.uniovi.sdi2223entrega2test62.util.SeleniumUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.*;
@@ -16,6 +18,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-   // static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+//  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -352,6 +355,7 @@ class Sdi2223Entrega2TestApplicationTests {
 
     }
 
+
     /**
      * [Prueba23] Hacer una búsqueda con el campo vacío y comprobar que se muestra la página que
      * corresponde con el listado de las ofertas existentes en el sistema
@@ -466,19 +470,21 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
 
+    // ----------------------------------------------------------------------------------------------------
+    // TESTING REST-API
+    // ----------------------------------------------------------------------------------------------------
 
 
-
-
+    // [Prueba38] Inicio de sesión con datos válidos
     @Test
     @Order(38)
     public void PR38() {
-        final String RestAssuredURL = "http://localhost:8081/api/v1.0/users/login";
+        final String RestAssuredURL = "http://localhost:8080/api/users/login";
         //2. Preparamos el parámetro en formato JSON
         RequestSpecification request = RestAssured.given();
         JSONObject requestParams = new JSONObject();
-        requestParams.put("email", "prueba1@prueba1.com");
-        requestParams.put("password", "prueba1");
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "123456");
         request.header("Content-Type", "application/json");
         request.body(requestParams.toJSONString());
         //3. Hacemos la petición
@@ -486,4 +492,136 @@ class Sdi2223Entrega2TestApplicationTests {
         //4. Comprobamos que el servicio ha tenido exito
         Assertions.assertEquals(200, response.getStatusCode());
     }
+
+    // [Prueba39] Inicio de sesión con datos inválidos (email existente, pero contraseña incorrecta)
+    @Test
+    @Order(39)
+    public void PR39() {
+        final String RestAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "incorrectPassword");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición
+        Response response = request.post(RestAssuredURL);
+        //4. Comprobamos que el servicio ha tenido exito
+        Assertions.assertEquals(401, response.getStatusCode());
+    }
+
+    // [Prueba40] Inicio de sesión con datos inválidos (campo email o contraseña vacíos)
+    @Test
+    @Order(40)
+    public void PR40() {
+        final String RestAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición
+        Response response = request.post(RestAssuredURL);
+        //4. Comprobamos que el servicio ha tenido exito
+        Assertions.assertEquals(401, response.getStatusCode());
+    }
+
+    // [Prueba41] Mostrar el listado de ofertas para dicho usuario y comprobar que se muestran todas las que
+    // existen para este usuario. Esta prueba implica invocar a dos servicios: S1 y S2.
+    @Test
+    @Order(41)
+    public void PR41() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+        //5. Preparamos la peticion de ofertas
+        final String RestOffersAssuredURL = "http://localhost:8080/api/offers";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200
+        response = request.get(RestOffersAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        // 7. Obtenemos las ofertas
+        body = response.body();
+        List<String> offers = body.path("offers");
+        Assertions.assertEquals(140, offers.size());
+    }
+
+    // [Prueba42] Enviar un mensaje a una oferta. Esta prueba consistirá en comprobar que el servicio
+    // almacena correctamente el mensaje para dicha oferta. Por lo tanto, el usuario tendrá que
+    // identificarse (S1), enviar un mensaje para una oferta de id conocido (S3) y comprobar que el
+    // mensaje ha quedado bien registrado (S4).
+    @Test
+    @Order(42)
+    public void PR42() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+
+        //5. Preparamos la peticion de ofertas
+        final String RestOffersAssuredURL = "http://localhost:8080/api/offers";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200
+        response = request.get(RestOffersAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        // 7. Obtenemos las ofertas
+        body = response.body();
+        HashMap offer = body.path("offers[1]");
+        String offerId = offer.get("_id").toString();
+
+        //8. Preparamos la peticion de mensajes
+        final String RestMessageAssuredURL = "http://localhost:8080/api/offers/" + offerId + "/messages";
+        System.out.println(RestMessageAssuredURL);
+        request = RestAssured.given();
+        requestParams = new JSONObject();
+        requestParams.put("message", "Esto es un mensaje nuevo");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        request.header("token", token);
+        //9. Hacemos la petición y comprobamos que devuelve 201
+        response = request.post(RestMessageAssuredURL);
+        Assertions.assertEquals(201, response.getStatusCode());
+
+        //10. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/" + offerId + "/conversation";
+        System.out.println(RestMessageAssuredURL);
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        List<String> messages = body.path("messages");
+        Assertions.assertEquals(1, messages.size());
+    }
 }
+
+
