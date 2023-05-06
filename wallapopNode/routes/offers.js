@@ -332,45 +332,55 @@ module.exports = function(app, offersRepository, usersRepository) {
     });
 
     app.get('/offers/highlight/:id', function (req, res) {
-        offersRepository.findOffer( {_id: ObjectId(req.params.id)}, {}).then(offer => {
-            if (offer == null){
+
+        usersRepository.findUser({email:req.session.user},{}).then(user => {
+            if(user.wallet - 20 < 0){
                 res.redirect("/offers/myOffers" +
-                    '?message=Error when obtaining offer.'+
+                    '?message=Error when highlighting offer, not enough money on wallet.'+
                     "&messageType=alert-danger");
-            } else {
-                offersRepository.findHighlightedOffer({_id: ObjectId(req.params.id)}, {}).then(highOffer => {
-                    if (highOffer == null){
-                        offer.highlighted = true
-                        payHighlight(req, res)
-                        offersRepository.insertHighlight(offer).then( offerId => {
-                            if (offerId == null) {
-                                res.redirect("/offers/myOffers" +
-                                    '?message=Error when highlighting offer.'+
-                                    "&messageType=alert-danger");
-                            } else {
-                                offersRepository.updateOffer(offer, {_id:ObjectId(req.params.id)}, {}).then(updatedOffer => {
-                                    if (updatedOffer == null) {
+            }else{
+                offersRepository.findOffer( {_id: ObjectId(req.params.id)}, {}).then(offer => {
+                    if (offer == null){
+                        res.redirect("/offers/myOffers" +
+                            '?message=Error when obtaining offer.'+
+                            "&messageType=alert-danger");
+                    } else {
+                        offersRepository.findHighlightedOffer({_id: ObjectId(req.params.id)}, {}).then(highOffer => {
+                            if (highOffer == null){
+                                offer.highlighted = true
+                                payHighlight(req, res)
+                                offersRepository.insertHighlight(offer).then( offerId => {
+                                    if (offerId == null) {
                                         res.redirect("/offers/myOffers" +
                                             '?message=Error when highlighting offer.'+
                                             "&messageType=alert-danger");
                                     } else {
-                                        res.redirect("/offers/myOffers" +
-                                            '?message=Offer highlighted.'+
-                                            "&messageType=alert-info")
+                                        offersRepository.updateOffer(offer, {_id:ObjectId(req.params.id)}, {}).then(updatedOffer => {
+                                            if (updatedOffer == null) {
+                                                res.redirect("/offers/myOffers" +
+                                                    '?message=Error when highlighting offer.'+
+                                                    "&messageType=alert-danger");
+                                            } else {
+                                                res.redirect("/offers/myOffers" +
+                                                    '?message=Offer highlighted.'+
+                                                    "&messageType=alert-info")
+                                            }
+                                        })
                                     }
                                 })
+                            } else {
+                                res.redirect("/offers/myOffers" +
+                                    '?message=Offer already highlighted.'+
+                                    "&messageType=alert-danger");
                             }
+
                         })
-                    } else {
-                        res.redirect("/offers/myOffers" +
-                            '?message=Offer already highlighted.'+
-                            "&messageType=alert-danger");
+
                     }
-
                 })
-
             }
         })
+
     })
     app.get('/offers/unhighlight/:id', function (req, res) {
         offersRepository.findOffer( {_id: ObjectId(req.params.id)}, {}).then(offer => {
