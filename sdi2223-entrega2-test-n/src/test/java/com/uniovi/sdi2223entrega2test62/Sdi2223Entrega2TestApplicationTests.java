@@ -501,21 +501,28 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
         //Rellenamos el formulario de login con datos válidos (usuario estandar).
         PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
-        //Compramos la oferta 10 del usuario 2.
-        PO_HomeView.checkElementBy(driver, "free", "/html/body/div/table/tbody/tr[3]/td[5]/a");
-        //Vamos al formulario de logout
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+        //Comprobamos que entramos a la vista:“shop”
+        String checkText = "Shop";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Compramos una oferta, oferta10User2
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr[3]/td[5]/a").get(0).click();
+
+        //Nos salimos de sesion
         PO_HomeView.clickOption(driver, "/users/logout", "free", "/html/body/nav/div/div[2]/ul[2]/li[2]/a");
 
-        //Vamos al formulario de login
-        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
         //Rellenamos el formulario de login con datos válidos (usuario estandar).
         PO_LoginView.fillLoginForm(driver,"user02@email.com","123456");
 
-        // Borramos la oferta oferta
+        // Borramos la oferta
         PO_View.checkElementBy(driver,"free","/html/body/div/table[1]/tbody/tr[1]/td[5]/a").get(0).click();
 
         //Comprobamos que no se borra
-        String checkText = "offer10User2";
+        checkText = "offer10User2";
         SeleniumUtils.textIsPresentOnPage(driver,checkText);
     }
 
