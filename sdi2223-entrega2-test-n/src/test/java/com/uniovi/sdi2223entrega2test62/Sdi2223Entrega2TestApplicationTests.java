@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -448,7 +449,6 @@ class Sdi2223Entrega2TestApplicationTests {
         // Comprobamos que segunda página este llena (5 ofertas)
         List<WebElement> offers2 = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
         Assertions.assertEquals(5, offers.size());
-
     }
 
     /**
@@ -608,6 +608,252 @@ class Sdi2223Entrega2TestApplicationTests {
         String checkText = "offer10User10";
         SeleniumUtils.textIsPresentOnPage(driver,checkText);
 
+    }
+
+    /**
+     * [Prueba26] Sobre una búsqueda determinada (a elección de desarrollador), comprar una oferta que
+     * deja un saldo positivo en el contador del comprobador. Y comprobar que el contador se actualiza
+     * correctamente en la vista del comprador.
+     */
+    @Test
+    @Order(26)
+    public void PR26() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+        //Comprobamos que entramos a la vista:“shop”
+        String checkText = "Shop";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("OFFER10USER2");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","/html/body/div/div[1]/div/form/div/span/button").get(0).click();
+
+        // Comprobamos que esta la oferta
+        checkText = "offer10User2";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+        int price  = parseInt(driver.findElement(By.xpath("/html/body/div/table/tbody/tr/td[4]")).getText());
+
+        //Comprobamos que el wallet esta en 100
+        WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 100",wallet.getText());
+
+        // Compramos la oferta, oferta10User2
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr/td[5]/a").get(0).click();
+
+        //Comprobamos que se ha reducido el wallet
+        wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+
+        Assertions.assertEquals("Wallet: " +(100 - price) , wallet.getText());
+
+    }
+
+    /**
+     * [Prueba27] Sobre una búsqueda determinada (a elección de desarrollador), comprar una oferta que
+     * deja un saldo 0 en el contador del comprobador. Y comprobar que el contador se actualiza
+     * correctamente en la vista del comprador.
+     */
+    @Test
+    @Order(27)
+    public void PR27() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Le damos a añadir oferta
+        List<WebElement> result = PO_View.checkElementBy(driver,"free","/html/body/div/div[2]/a");
+        result.get(0).click();
+
+        PO_PrivateView.fillFormAddOffer(driver,"A1","test26","100",false);
+
+        //Comprobamos que se añade la oferta
+        String checkText = "A1";
+        List<WebElement> offerTitle = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, offerTitle.get(0).getText());
+
+        //Nos salimos de sesion
+        PO_HomeView.clickOption(driver, "/users/logout", "free", "/html/body/nav/div/div[2]/ul[2]/li[2]/a");
+
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user02@email.com","123456");
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+
+        //Comprobamos que entramos a la vista:“shop”
+        checkText = "Shop";
+        result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("A1");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","/html/body/div/div[1]/div/form/div/span/button").get(0).click();
+
+        // Comprobamos que esta la oferta
+        checkText = "A1";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+        int price  = parseInt(driver.findElement(By.xpath("/html/body/div/table/tbody/tr/td[4]")).getText());
+
+        //Comprobamos que el wallet esta en 100
+        WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 100",wallet.getText());
+
+        // Compramos la oferta, A1
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr/td[5]/a").get(0).click();
+
+        //Comprobamos que se ha reducido el wallet
+        wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+
+        Assertions.assertEquals("Wallet: " +(100 - price) , wallet.getText());
+    }
+
+    /**
+     * [Prueba28] Sobre una búsqueda determinada (a elección de desarrollador), intentar comprar una oferta
+     * que esté por encima de saldo disponible del comprador. Y comprobar que se muestra el mensaje
+     * de saldo no suficiente.
+     */
+    @Test
+    @Order(28)
+    public void PR28() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Le damos a añadir oferta
+        List<WebElement> result = PO_View.checkElementBy(driver,"free","/html/body/div/div[2]/a");
+        result.get(0).click();
+
+        PO_PrivateView.fillFormAddOffer(driver,"A1","test26","110",false);
+
+        //Comprobamos que se añade la oferta
+        String checkText = "A1";
+        List<WebElement> offerTitle = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, offerTitle.get(0).getText());
+
+        //Nos salimos de sesion
+        PO_HomeView.clickOption(driver, "/users/logout", "free", "/html/body/nav/div/div[2]/ul[2]/li[2]/a");
+
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user02@email.com","123456");
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+
+        //Comprobamos que entramos a la vista:“shop”
+        checkText = "Shop";
+        result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("A1");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","/html/body/div/div[1]/div/form/div/span/button").get(0).click();
+
+        // Comprobamos que esta la oferta
+        checkText = "A1";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+        int price  = parseInt(driver.findElement(By.xpath("/html/body/div/table/tbody/tr/td[4]")).getText());
+
+        //Comprobamos que el wallet esta en 100
+        WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 100",wallet.getText());
+
+        // Compramos la oferta, A1
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr/td[5]/a").get(0).click();
+
+        //Comprobamos que no se ha reducido el wallet
+        wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 100", wallet.getText());
+
+        //Comprobamos que se notifican los errores
+        checkText = "You don't have enough money";
+        result = PO_View.checkElementBy(driver, "class", "alert alert-danger ");
+        Assertions.assertEquals(checkText, result.get(0).getText());
+    }
+
+    /**
+     * [Prueba29] Ir a la opción de ofertas compradas del usuario y mostrar la lista. Comprobar que aparecen
+     * las ofertas que deben aparecer.
+     */
+    @Test
+    @Order(29)
+    public void PR29() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver, "user01@email.com", "123456");
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("OFFER10USER2");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","/html/body/div/div[1]/div/form/div/span/button").get(0).click();
+
+        // Compramos la oferta, oferta10User2
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr/td[5]/a").get(0).click();
+
+        //Vamos a las compras
+        PO_HomeView.clickOption(driver, "/purchases", "free", "/html/body/nav/div/div[2]/ul[1]/li[3]/a");
+        //Comprobamos que entramos a la vista:“purchases”
+        String checkText = "My Purchases";
+        List<WebElement> result = PO_View.checkElementBy(driver, "free","/html/body/div/h2");
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Comprobamos que la primera página tiene una oferta
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "/html/body/div/div/table/tbody/tr");
+        Assertions.assertEquals(1, offers.size());
+
+        //Vamos a la tienda
+        PO_HomeView.clickOption(driver, "/shop", "free", "/html/body/nav/div/div[2]/ul[1]/li[1]/a");
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("OFFER1USER2");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","/html/body/div/div[1]/div/form/div/span/button").get(0).click();
+
+        // Compramos la oferta, oferta1User2
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr/td[5]/a").get(0).click();
+        //Vamos a las compras
+        PO_HomeView.clickOption(driver, "/purchases", "free", "/html/body/nav/div/div[2]/ul[1]/li[3]/a");
+        //Comprobamos que entramos a la vista:“purchases”
+        checkText = "My Purchases";
+        result = PO_View.checkElementBy(driver, "free","/html/body/div/h2");
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+        // Comprobamos que la primera página tiene una oferta
+        offers = PO_View.checkElementBy(driver, "free", "/html/body/div/div/table/tbody/tr");
+        Assertions.assertEquals(2, offers.size());
     }
 
     /**

@@ -51,7 +51,7 @@ public class MongoDB {
         getMongodb().getCollection("offers").drop();
         getMongodb().getCollection("highlightedOffers").drop();
         getMongodb().getCollection("conversations").drop();
-
+        getMongodb().getCollection("purchases").drop();
     }
 
     private void insertUsuarios() {
@@ -238,7 +238,6 @@ public class MongoDB {
                         .append("price", offerPrice)
                         .append("author", userEmail)
                         .append("highlighted", isHighlighted);
-
                 ofertas.insertOne(offer);
             }
         }
