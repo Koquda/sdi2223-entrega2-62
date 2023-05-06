@@ -330,6 +330,7 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("Error occurred when obtaining your purchases: " + error);
         });
     });
+
     app.get('/offers/highlight/:id', function (req, res) {
         offersRepository.findOffer( {_id: ObjectId(req.params.id)}, {}).then(offer => {
             if (offer == null){
