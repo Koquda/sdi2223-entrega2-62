@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-//  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+ //   static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+  static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -467,6 +467,155 @@ class Sdi2223Entrega2TestApplicationTests {
         WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
         Assertions.assertEquals("Wallet: 80",wallet.getText());
 
+    }
+
+    /**
+     * [Prueba31] Sobre el listado de ofertas de un usuario con más de 20 euros de saldo, pinchar en el enlace
+     * Destacada y a continuación comprobar: i) que aparece en el listado de ofertas destacadas para los
+     * usuarios y que el saldo del usuario se actualiza adecuadamente en la vista del ofertante (comprobar
+     * saldo antes y después, que deberá diferir en 20€ ).
+     */
+    @Test
+    @Order(31)
+    public void PR31() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        // Marcamos la primera oferta como highlighted
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        // Comprobamos que se añade a la tabla de highlited offers
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "/html/body/div/table[2]/tbody/tr");
+        Assertions.assertEquals(1, offers.size());
+
+        //Comprobamos que se ha reducido el wallet
+        WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 80",wallet.getText());
+
+    }
+
+    /**
+     * [Prueba32] Sobre el listado de ofertas de un usuario con menos de 20 euros de saldo, pinchar en el
+     * enlace Destacada y a continuación comprobar que se muestra el mensaje de saldo no suficiente.
+     */
+    @Test
+    @Order(32)
+    public void PR32() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user15@email.com","123456");
+
+        // Marcamos la primera oferta como highlighted
+        PO_View.checkElementBy(driver,"free","/html/body/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        // Comprobamos que salta el mensaje de error
+        String checkText = "Error when highlighting offer, not enough money on wallet.";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+
+    }
+
+    /**
+     * [Prueba33] Intentar acceder sin estar autenticado a la opción de listado de usuarios. Se deberá volver
+     * al formulario de login.
+     */
+    @Test
+    @Order(33)
+    public void PR33() {
+        //Accedemos a la url
+        driver.get("http://localhost:8080/users/list");
+
+        //Comprobamos que se nos redirije a la pagina del login
+        String checkText = "Log In";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+    }
+
+    /**
+     * [Prueba34] Intentar acceder sin estar autenticado a la opción de listado de conversaciones
+     * [REQUISITO OBLIGATORIO S5]. Se deberá volver al formulario de login.
+     */
+    @Test
+    @Order(34)
+    public void PR34() {
+        //Accedemos a la url
+        driver.get("http://localhost:8080/api/offers/conversations");
+
+        //Comprobamos que se nos redirije a la pagina del login
+        String checkText = "Log In";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+    }
+
+    /**
+     * [Prueba35] Estando autenticado como usuario estándar intentar acceder a una opción disponible solo
+     * para usuarios administradores (Añadir menú de auditoria (visualizar logs)). Se deberá indicar un
+     * mensaje de acción prohibida.
+     */
+    @Test
+    @Order(35)
+    public void PR35() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Accedemos a la url
+        driver.get("http://localhost:8080/log/list");
+
+        //Comprobamos que se nos muestra el error
+        String checkText = "You need role admin to enter that URL";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+    }
+
+
+    /**
+     * [Prueba36] Estando autenticado como usuario administrador visualizar todos los logs generados en
+     * una serie de interacciones. Esta prueba deberá generar al menos dos interacciones de cada tipo y
+     * comprobar que el listado incluye los logs correspondientes.
+     */
+    @Test
+    @Order(36)
+    public void PR36() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Accedemos a la url
+        driver.get("http://localhost:8080/log/list");
+
+        //Comprobamos que estan las peticiones
+        String pet1 = "/log/list GET {}";
+        String pet2 = "/users/login GET {}";
+
+        SeleniumUtils.textIsPresentOnPage(driver,pet1);
+        SeleniumUtils.textIsPresentOnPage(driver,pet2);
+    }
+
+    /**
+     * [Prueba37] Estando autenticado como usuario administrador, ir a visualización de logs, pulsar el
+     * botón/enlace borrar logs y comprobar que se eliminan los logs de la base de datos.
+     */
+    @Test
+    @Order(37)
+    public void PR37() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Accedemos a la url
+        driver.get("http://localhost:8080/log/list");
+
+       //Pulsamos el boton de eliminar todos los logs
+        PO_View.checkElementBy(driver,"free","/html/body/div/form/button").get(0).click();
+
+        //Comprobamos que solo esta presente el log relativo a el borrado de estos
+        SeleniumUtils.textIsPresentOnPage(driver, "/log/list GET {}");
+
+        List<WebElement> peticion = PO_View.checkElementBy(driver,"free","//*[@id=\"tableLogs\"]/tbody/tr");
+        Assertions.assertEquals(1,peticion.size());
     }
 
 
