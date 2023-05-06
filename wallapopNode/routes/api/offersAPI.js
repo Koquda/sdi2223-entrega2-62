@@ -43,17 +43,36 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
         let filter = {_id: ObjectId(offerID)}
         offersRepository.findOfferOwner(filter).then(offer => {
-            let offerOwner = offer.author;
-            const offerTitle =  offer.title
+            if (offer == null){
+                return res.status(404).json({error:"Offer not found"});
+            } else {
+                let offerOwner = offer.author;
+                const offerTitle =  offer.title
 
-            filter = {ownerID: offerOwner, offerID: offerID}
-            conversationsRepository.findAllConversationFilter(filter).then(conversations => {
-                if (conversations.length == 0) {
-                    if (user === offerOwner) {
-                        return res.status(403).json({error: "You cant start a conversation on your own offer"});
+                filter = {ownerID: offerOwner, offerID: offerID}
+                conversationsRepository.findAllConversationFilter(filter).then(conversations => {
+                    if (conversations.length == 0) {
+                        if (user === offerOwner) {
+                            return res.status(403).json({error: "You cant start a conversation on your own offer"});
+                        } else {
+                            let newMessage = {
+                                userID: user,
+                                ownerID: offerOwner,
+                                offerID: offerID,
+                                message: message,
+                                date: new Date().toLocaleString(),
+                                read: false,
+                                sentBy: user,
+                                offerTitle: offerTitle
+                            }
+
+                            conversationsRepository.insertConversation(newMessage)
+
+                            return res.status(201).json({message: "Message created successfully"});
+                        }
                     } else {
                         let newMessage = {
-                            userID: user,
+                            userID: conversations[0].userID,
                             ownerID: offerOwner,
                             offerID: offerID,
                             message: message,
@@ -67,25 +86,9 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
                         return res.status(201).json({message: "Message created successfully"});
                     }
-                } else {
-                    let newMessage = {
-                        userID: conversations[0].userID,
-                        ownerID: offerOwner,
-                        offerID: offerID,
-                        message: message,
-                        date: new Date().toLocaleString(),
-                        read: false,
-                        sentBy: user,
-                        offerTitle: offerTitle
-                    }
 
-                    conversationsRepository.insertConversation(newMessage)
-
-                    return res.status(201).json({message: "Message created successfully"});
-                }
-
-            })
-
+                })
+            }
 
         });
     })
