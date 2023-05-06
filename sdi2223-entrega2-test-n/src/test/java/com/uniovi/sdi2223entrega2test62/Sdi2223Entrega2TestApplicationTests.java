@@ -11,6 +11,7 @@ import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.*;
+import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -306,7 +307,7 @@ class Sdi2223Entrega2TestApplicationTests {
 
         // Comprobamos que segunda página este llena (5 ofertas)
         List<WebElement> offers2 = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
-        Assertions.assertEquals(5, offers.size());
+        Assertions.assertEquals(5, offers2.size());
 
     }
 
@@ -353,6 +354,121 @@ class Sdi2223Entrega2TestApplicationTests {
 
 
     }
+
+
+    /**
+     * [Prueba23] Hacer una búsqueda con el campo vacío y comprobar que se muestra la página que
+     * corresponde con el listado de las ofertas existentes en el sistema
+     */
+    @Test
+    @Order(23)
+    public void PR23() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        // Clickamos en el buscador sin introducir ningun texto
+        PO_View.checkElementBy(driver,"free","//*[@id=\"custom-search-input \"]/form/div/span/button").get(0).click();
+
+        // Comprobamos que siguen habiendo 5 ofertas en la pagina
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "/html/body/div/table[1]/tbody/tr");
+        Assertions.assertEquals(5, offers.size());
+
+        //Comprobamos que siguen siendo las mismas
+        String checkText = "offer10User1Details";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+
+
+    }
+
+    /**
+     * [Prueba24] Hacer una búsqueda escribiendo en el campo un texto que no exista y comprobar que se
+     * muestra la página que corresponde, con la lista de ofertas vacía.
+     */
+    @Test
+    @Order(24)
+    public void PR24() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Rellenamos el input a buscar con una oferta inexistente
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("oferta365");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","//*[@id=\"custom-search-input \"]/form/div/span/button").get(0).click();
+
+        // Comprobamos que la tabla esta vacia
+        List<WebElement> rows = driver.findElements(By.xpath("//table[@class='table table-hover']/tbody/tr"));
+        Assertions.assertTrue(rows.isEmpty());
+
+    }
+
+
+    /**
+     * [Prueba25] Hacer una búsqueda escribiendo en el campo un texto en minúscula o mayúscula y
+     * comprobar que se muestra la página que corresponde, con la lista de ofertas que contengan dicho
+     * texto, independientemente que el título esté almacenado en minúsculas o mayúscula.
+     */
+    @Test
+    @Order(25)
+    public void PR25() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Rellenamos el input a buscar con una oferta existente pero escrita en mayusculas
+        WebElement search = driver.findElement(By.name("search"));
+        search.click();
+        search.clear();
+        search.sendKeys("OFFER10USER10");
+
+        // Clickamos en el buscador
+        PO_View.checkElementBy(driver,"free","//*[@id=\"custom-search-input \"]/form/div/span/button").get(0).click();
+
+        // Comprobamos que esta la oferta
+        String checkText = "offer10User10";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
+
+    }
+
+    /**
+    * [Prueba30] Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
+    * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
+    * actualiza adecuadamente en la vista del ofertante (comprobar saldo antes y después, que deberá
+    * diferir en 20€).
+     */
+    @Test
+    @Order(30)
+    public void PR30() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario estandar).
+        PO_LoginView.fillLoginForm(driver,"user01@email.com","123456");
+
+        //Accedemos al formulario de añadir ofertas
+        List<WebElement> result = PO_View.checkElementBy(driver,"free","/html/body/div/div[2]/a");
+        result.get(0).click();
+
+        // Creamos la oferta
+        PO_PrivateView.fillFormAddOffer(driver,"Titulo test30","test30","6.50",true);
+
+        // Comprobamos que se añade a la tabla de highlited offers
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "/html/body/div/table[2]/tbody/tr");
+        Assertions.assertEquals(1, offers.size());
+
+        //Comprobamos que se ha reducido el wallet
+        WebElement wallet  = driver.findElement(By.xpath("/html/body/nav/div/div[2]/ul[2]/li[1]/a/span"));
+        Assertions.assertEquals("Wallet: 80",wallet.getText());
+
+    }
+
 
     // ----------------------------------------------------------------------------------------------------
     // TESTING REST-API
