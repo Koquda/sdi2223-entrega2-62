@@ -49,6 +49,9 @@ public class MongoDB {
     private void deleteData() {
         getMongodb().getCollection("users").drop();
         getMongodb().getCollection("offers").drop();
+        getMongodb().getCollection("highlightedOffers").drop();
+        getMongodb().getCollection("conversations").drop();
+
     }
 
     private void insertUsuarios() {
@@ -218,7 +221,7 @@ public class MongoDB {
         MongoCollection<Document> ofertas = getMongodb().getCollection("offers");
         Random rand = new Random();
 
-        for (int userNum = 1; userNum <= 10; userNum++) {
+        for (int userNum = 1; userNum <= 15; userNum++) {
             String userEmail = (userNum < 10)?"user0" + userNum + "@email.com":"user" + userNum + "@email.com";
 
             for (int offerNum = 1; offerNum <= 10; offerNum++) {
