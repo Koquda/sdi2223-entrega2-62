@@ -27,13 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+   // static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
 //     static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
-//  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
+  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
-    static WebDriver driverClient = getDriverClient(PathFirefox, Geckodriver);
     static String URL = "http://localhost:8080";
     static String URLCLIENT = "http://localhost:8080/apiclient/client.html";
     static MongoDB mongoDB = new MongoDB();
@@ -43,12 +42,6 @@ class Sdi2223Entrega2TestApplicationTests {
         System.setProperty("webdriver.gecko.driver", Geckodriver);
         driver = new FirefoxDriver();
         return driver;
-    }
-    public static WebDriver getDriverClient(String PathFirefox, String Geckodriver) {
-        System.setProperty("webdriver.firefox.bin", PathFirefox);
-        System.setProperty("webdriver.gecko.driver", Geckodriver);
-        driverClient = new FirefoxDriver();
-        return driverClient;
     }
 
     @BeforeEach
@@ -73,7 +66,6 @@ class Sdi2223Entrega2TestApplicationTests {
     static public void end() {
         //Cerramos el navegador al finalizar las pruebas
         driver.quit();
-        driverClient.quit();
     }
 
     /**
@@ -1501,7 +1493,7 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
         Assertions.assertEquals(checkText, result.get(0).getText());
 
-        driverClient.manage().deleteAllCookies();
+        driver.manage().deleteAllCookies();
     }
 
     /**
@@ -1510,28 +1502,26 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(49)
     public void PR49() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+        driver.navigate().to(URLCLIENT);
 
         //Rellenamos el formulario de login de un usuario pero con contraseña falsa
-        WebElement email = driverClient.findElement(By.name("email"));
+        WebElement email = driver.findElement(By.name("email"));
         email.click();
         email.clear();
         email.sendKeys("user01@email.com");
-        WebElement password = driverClient.findElement(By.name("password"));
+        WebElement password = driver.findElement(By.name("password"));
         password.click();
         password.clear();
         password.sendKeys("1123127348124");
 
         //Le damos click al boton de login
-        PO_View.checkElementBy(driverClient,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
 
         //Comprobamos que se notifican los errores
         String checkText = "Usuario no encontrado";
-        List<WebElement> result = PO_View.checkElementBy(driverClient, "class", "alert alert-danger");
+        List<WebElement> result = PO_View.checkElementBy(driver, "class", "alert alert-danger");
         Assertions.assertEquals(checkText, result.get(0).getText());
 
-        driverClient.manage().deleteAllCookies();
     }
 
     /**
@@ -1540,28 +1530,26 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(50)
     public void PR50() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+        driver.navigate().to(URLCLIENT);
+
 
         //Rellenamos el formulario de login de un usuario pero con contraseña falsa
-        WebElement email = driverClient.findElement(By.name("email"));
+        WebElement email = driver.findElement(By.name("email"));
         email.click();
         email.clear();
         email.sendKeys("");
-        WebElement password = driverClient.findElement(By.name("password"));
+        WebElement password = driver.findElement(By.name("password"));
         password.click();
         password.clear();
         password.sendKeys("");
 
         //Le damos click al boton de login
-        PO_View.checkElementBy(driverClient,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
 
         //Comprobamos que se notifican los errores
         String checkText = "Usuario no encontrado";
-        List<WebElement> result = PO_View.checkElementBy(driverClient, "class", "alert alert-danger");
+        List<WebElement> result = PO_View.checkElementBy(driver, "class", "alert alert-danger");
         Assertions.assertEquals(checkText, result.get(0).getText());
-
-        driverClient.manage().deleteAllCookies();
     }
 
     /**
@@ -1571,27 +1559,25 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(51)
     public void PR51() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+        driver.navigate().to(URLCLIENT);
 
         //Rellenamos el formulario de login de un usuario pero con contraseña falsa
-        WebElement email = driverClient.findElement(By.name("email"));
+        WebElement email = driver.findElement(By.name("email"));
         email.click();
         email.clear();
         email.sendKeys("user01@email.com");
-        WebElement password = driverClient.findElement(By.name("password"));
+        WebElement password = driver.findElement(By.name("password"));
         password.click();
         password.clear();
         password.sendKeys("123456");
 
         //Le damos click al boton de login
-        PO_View.checkElementBy(driverClient,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
 
         // Comprobamos que la primera página este llena (5 ofertas)
-        List<WebElement> offers = PO_View.checkElementBy(driverClient, "free", "//*[@id=\"offersTableBody\"]/tr");
+        List<WebElement> offers = PO_View.checkElementBy(driver, "free", "//*[@id=\"offersTableBody\"]/tr");
         Assertions.assertEquals(140, offers.size());
 
-        driverClient.manage().deleteAllCookies();
     }
 
     /**
@@ -1602,52 +1588,237 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(52)
     public void PR52() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+        driver.navigate().to(URLCLIENT);
 
         //Rellenamos el formulario de login de un usuario pero con contraseña falsa
-        WebElement email = driverClient.findElement(By.name("email"));
+        WebElement email = driver.findElement(By.name("email"));
         email.click();
         email.clear();
         email.sendKeys("user01@email.com");
-        WebElement password = driverClient.findElement(By.name("password"));
+        WebElement password = driver.findElement(By.name("password"));
         password.click();
         password.clear();
         password.sendKeys("123456");
 
         //Le damos click al boton de login
-        PO_View.checkElementBy(driverClient,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
 
         //Le damos click al boton de coversacion de la primera oferta
-        PO_View.checkElementBy(driverClient,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
 
         //Rellenamos un mensaje
-        WebElement mensaje = driverClient.findElement(By.name("message"));
+        WebElement mensaje = driver.findElement(By.name("message"));
         mensaje.click();
         mensaje.clear();
         mensaje.sendKeys("Hola");
 
         //Le damos click al boton de send
-        PO_View.checkElementBy(driverClient,"free","//*[@id=\"button-send-message\"]").get(0).click();
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
 
-        SeleniumUtils.waitSeconds(driverClient, 5);
+        SeleniumUtils.waitSeconds(driver, 1);
         //Vemos que ya hay un mensaje
-        List<WebElement> mensajes = PO_View.checkElementBy(driverClient, "free","//*[@id=\"messagesTableBody\"]/tr");
+        List<WebElement> mensajes = PO_View.checkElementBy(driver, "free","//*[@id=\"messagesTableBody\"]/tr");
         Assertions.assertEquals(1, mensajes.size());
 
         //Rellenamos un mensaje
-        mensaje = driverClient.findElement(By.name("message"));
+        mensaje = driver.findElement(By.name("message"));
         mensaje.click();
         mensaje.clear();
         mensaje.sendKeys("Hola 1");
 
 
         //Le damos click al boton de send
-        PO_View.checkElementBy(driverClient,"free","//*[@id=\"button-send-message\"]").get(0).click();
-        SeleniumUtils.waitSeconds(driverClient, 5);
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+        SeleniumUtils.waitSeconds(driver, 1);
 
         //Vemos que ya hay dos mensaje
-        mensajes = PO_View.checkElementBy(driverClient, "free","//*[@id=\"messagesTableBody\"]/tr");
+        mensajes = PO_View.checkElementBy(driver, "free","//*[@id=\"messagesTableBody\"]/tr");
         Assertions.assertEquals(2, mensajes.size());
+    }
+
+    /**
+     * [Prueba55] Sobre el listado de conversaciones ya abiertas. Pinchar el enlace Eliminar en la primera y
+     * comprobar que el listado se actualiza correctamente.
+     */
+    @Test
+    @Order(55)
+    public void PR55() {
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        WebElement email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        WebElement password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        WebElement mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login para hacer otra conversacion
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la segunda oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[2]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login para hacer otra conversacion
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton conversaciones
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/button[2]").get(0).click();
+
+        //Vemos que ya hay dos conversaciones
+        List<WebElement> conversaciones = PO_View.checkElementBy(driver, "free","//*[@id=\"ConversationsTableBody\"]/tr");
+        Assertions.assertEquals(2, conversaciones.size());
+
+        //Le damos click al boton de delete de la primera conversacion
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[3]/a").get(0).click();
+
+        //Vemos que hay una menos
+        conversaciones = PO_View.checkElementBy(driver, "free","//*[@id=\"ConversationsTableBody\"]/tr");
+        Assertions.assertEquals(1, conversaciones.size());
+    }
+
+    /**
+     * [Prueba56] Sobre el listado de conversaciones ya abiertas. Pinchar el enlace Eliminar en la última y
+     * comprobar que el listado se actualiza correctamente.
+     */
+    @Test
+    @Order(56)
+    public void PR56() {
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        WebElement email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        WebElement password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        WebElement mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login para hacer otra conversacion
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la segunda oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[2]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login para hacer otra conversacion
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton conversaciones
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/button[2]").get(0).click();
+
+        //Vemos que ya hay dos conversaciones
+        List<WebElement> conversaciones = PO_View.checkElementBy(driver, "free","//*[@id=\"ConversationsTableBody\"]/tr");
+        Assertions.assertEquals(2, conversaciones.size());
+
+        //Le damos click al boton de delete de la ultima conversacion
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[2]/td[3]/a").get(0).click();
+
+        //Vemos que hay una menos
+        conversaciones = PO_View.checkElementBy(driver, "free","//*[@id=\"ConversationsTableBody\"]/tr");
+        Assertions.assertEquals(1, conversaciones.size());
     }
 }
