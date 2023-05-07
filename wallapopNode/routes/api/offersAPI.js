@@ -199,7 +199,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
             conversation.read = true;
             conversationsRepository.updateConversation(conversation,filter,{}).then(()=>{
-                return res.status(200).json({message: "Message read"})
+                return res.status(200).json({message: "Message read", offerId: conversation.offerID})
             } )
         })
 

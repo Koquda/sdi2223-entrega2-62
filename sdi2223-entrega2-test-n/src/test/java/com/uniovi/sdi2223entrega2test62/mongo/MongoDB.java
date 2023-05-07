@@ -275,4 +275,11 @@ public class MongoDB {
 
         return offer.get("_id").toString();
     }
+
+    public String getFirstConversation() {
+        MongoCollection<Document> conversations = getMongodb().getCollection("conversations");
+        Document conversation = conversations.find().first();
+
+        return conversation.get("_id").toString();
+    }
 }
