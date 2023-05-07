@@ -25,6 +25,7 @@ userTokenRouter.use(function (req, res, next) {
             authorized: false,
             error: 'No hay Token'
         });
+        res.render("public/apiclient/client.html")
     }
 });
 module.exports = userTokenRouter;
