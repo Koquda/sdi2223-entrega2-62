@@ -27,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-    // static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+    //static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+     static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
 //  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
 
 //Común a Windows y a MACOSX
@@ -384,6 +384,36 @@ class Sdi2223Entrega2TestApplicationTests {
         SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
         checkText = "user03@email.com";
         SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+    }
+
+    /**
+     * [Prueba15] Intentar borrar el usuario que se encuentra en sesión y comprobar que no ha sido borrado
+     * (porque no es un usuario administrador o bien, porque, no se puede borrar a sí mismo, si está
+     * autenticado).
+     */
+    @Test
+    @Order(15)
+    public void PR15() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+
+        // Clicar en la casilla del usuario
+        PO_View.checkElementBy(driver,"free", "/html/body/div/form/div[1]/table/tbody/tr["+ 1 +"]/td[1]/input").get(0).click();
+
+        // Clicar en borrar
+        PO_View.checkElementBy(driver,"free", "//*[@id=\"deleteButton\"]").get(0).click();
+
+        //Comprobamos que no  se borra
+        checkText = "admin@email.com";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
     }
 
     /**
@@ -1039,10 +1069,11 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_View.checkElementBy(driver,"free","/html/body/div/form/button").get(0).click();
 
         //Comprobamos que solo esta presente el log relativo a el borrado de estos
-        SeleniumUtils.textIsPresentOnPage(driver, "/log/list GET {}");
-
         List<WebElement> peticion = PO_View.checkElementBy(driver,"free","//*[@id=\"tableLogs\"]/tbody/tr");
         Assertions.assertEquals(1,peticion.size());
+
+        SeleniumUtils.textIsPresentOnPage(driver, "/log/list GET {}");
+
     }
 
 
@@ -1357,8 +1388,9 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(48)
     public void PR48() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+      //  driverClient.navigate().to(URLCLIENT);
+        driver.get(URLCLIENT);
+//        mongoDB.resetMongo();
 
        //Rellenamos el formulario de login de un usuario
         WebElement email = driver.findElement(By.name("email"));
