@@ -965,8 +965,9 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(34)
     public void PR34() {
+        // TODO mirar si esta bien
         //Accedemos a la url
-        driver.get("http://localhost:8080/api/offers/conversations");
+        driver.get("http://localhost:8080/apiclient/client.html");
 
         //Comprobamos que se nos redirije a la pagina del login
         String checkText = "Log In";
@@ -1331,9 +1332,19 @@ class Sdi2223Entrega2TestApplicationTests {
         response = request.get(RestGetMessageAssuredURL);
         Assertions.assertEquals(200, response.getStatusCode());
         body = response.body();
-        List<String> messages = body.path("messages");
+        List<String> conversations = body.path("conversations");
         //7. Comprobamos que no existe el mensaje
-        Assertions.assertEquals(2, messages.size());
+        Assertions.assertEquals(1, conversations.size());
+    }
+
+    // [Prueba46] Eliminar una conversación de ID conocido. Esta prueba consistirá en comprobar que se
+    // elimina correctamente una conversación concreta. Por lo tanto, se tendrá primero que invocar al
+    // servicio de identificación (S1), eliminar la conversación ID (S6) y solicitar el listado de
+    // conversaciones a continuación (S5), comprobando que se retornan las conversaciones adecuadas.
+    @Test
+    @Order(46)
+    public void PR46() {
+
     }
 
     // ----------------------------------------------------------------------------------------------------

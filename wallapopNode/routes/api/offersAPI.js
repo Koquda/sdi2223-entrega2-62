@@ -135,6 +135,7 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
     })
     app.get("/api/offers/conversations", function (req, res) {
+        console.log("hola")
         let user = getSessionUser(req);
         if (user == null) {
             return res.status(401).json("Error occurred while user authentication process");
