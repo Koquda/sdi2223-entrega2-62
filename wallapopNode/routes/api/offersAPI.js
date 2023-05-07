@@ -28,7 +28,6 @@ module.exports = function (app, offersRepository, conversationsRepository) {
             res.json({error: "Error occurred when obtaining offers"})
         });
     })
-
     app.post("/api/offers/:id/messages", function (req, res) {
         let user = getSessionUser(req);
         let message = req.body.message;
@@ -92,7 +91,6 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
         });
     })
-
     app.get("/api/offers/:id/conversation", function (req, res) {
         let user = getSessionUser(req);
         let offerID = req.params.id;
@@ -136,7 +134,6 @@ module.exports = function (app, offersRepository, conversationsRepository) {
 
 
     })
-
     app.get("/api/offers/conversations", function (req, res) {
         let user = getSessionUser(req);
         if (user == null) {
@@ -156,7 +153,6 @@ module.exports = function (app, offersRepository, conversationsRepository) {
             res.json({error: "Se ha producido un error al recuperar las conversaciones."})
         });
     })
-
     app.delete("/api/offers/conversation/delete/:id", function (req, res) {
         let user = getSessionUser(req);
         let conversationID = req.params.id;
@@ -186,7 +182,6 @@ module.exports = function (app, offersRepository, conversationsRepository) {
             }
         })
     })
-
     app.post("/api/offers/:id/markRead", function(req, res){
         let user = getSessionUser(req);
         let conversationID = req.params.id;
@@ -210,6 +205,25 @@ module.exports = function (app, offersRepository, conversationsRepository) {
     })
 
 
+
+    // EndPoint que devuelve las ofertas del usuario, usada solo para testing
+    app.get("/api/myOffers", function (req, res) {
+        const user = getSessionUser(req);
+        let filter = {author: user};
+        let options = {};
+        offersRepository.getOffers(filter, options).then(offers => {
+            if (offers == null) {
+                res.status(404)
+                res.json({error: "Error occurred when obtaining offers, there are none"})
+            } else {
+                res.status(200);
+                res.send({offers: offers})
+            }
+        }).catch(error => {
+            res.status(500);
+            res.json({error: "Error occurred when obtaining offers"})
+        });
+    })
 }
 
 
