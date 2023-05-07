@@ -1493,7 +1493,6 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
         Assertions.assertEquals(checkText, result.get(0).getText());
 
-        driver.manage().deleteAllCookies();
     }
 
     /**
@@ -1531,7 +1530,6 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(50)
     public void PR50() {
         driver.navigate().to(URLCLIENT);
-
 
         //Rellenamos el formulario de login de un usuario pero con contraseña falsa
         WebElement email = driver.findElement(By.name("email"));
@@ -1634,6 +1632,145 @@ class Sdi2223Entrega2TestApplicationTests {
         //Vemos que ya hay dos mensaje
         mensajes = PO_View.checkElementBy(driver, "free","//*[@id=\"messagesTableBody\"]/tr");
         Assertions.assertEquals(2, mensajes.size());
+    }
+
+    /**
+     *[Prueba53] Sobre el listado de conversaciones enviar un mensaje a una conversación ya abierta.
+     * Comprobar que el mensaje aparece en el listado de mensajes.
+     *
+     */
+    @Test
+    @Order(53)
+    public void PR53() {
+        driver.navigate().to(URLCLIENT);
+        mongoDB.resetMongo();
+
+        //Rellenamos el formulario de login
+        WebElement email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        WebElement password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        WebElement mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        WebElement email2 = driver.findElement(By.name("email"));
+        email2.click();
+        email2.clear();
+        email2.sendKeys("user01@email.com");
+        WebElement password2 = driver.findElement(By.name("password"));
+        password2.click();
+        password2.clear();
+        password2.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        //Comprobamos que este el mensaje anterior
+        SeleniumUtils.textIsPresentOnPage(driver,"Hola");
+
+        //Rellenamos un mensaje
+        WebElement mensaje2 = driver.findElement(By.name("message"));
+        mensaje2.click();
+        mensaje2.clear();
+        mensaje2.sendKeys("Hola 2");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+
+        //Comprobamos que este el mensaje
+        SeleniumUtils.textIsPresentOnPage(driver,"Hola 2");
+
+
+    }
+
+    /**
+     *[Prueba54] Mostrar el listado de conversaciones ya abiertas. Comprobar que el listado contiene la
+     * cantidad correcta de conversaciones.
+     *
+     */
+    @Test
+    @Order(54)
+    public void PR54() {
+        driver.navigate().to(URLCLIENT);
+        mongoDB.resetMongo();
+
+        //Rellenamos el formulario de login
+        WebElement email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys("user01@email.com");
+        WebElement password = driver.findElement(By.name("password"));
+        password.click();
+        password.clear();
+        password.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+        //Le damos click al boton de coversacion de la primera oferta
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/table/tbody/tr[1]/td[6]/a").get(0).click();
+
+        //Rellenamos un mensaje
+        WebElement mensaje = driver.findElement(By.name("message"));
+        mensaje.click();
+        mensaje.clear();
+        mensaje.sendKeys("Hola");
+
+        //Le damos click al boton de send
+        PO_View.checkElementBy(driver,"free","//*[@id=\"button-send-message\"]").get(0).click();
+
+        //Volvemos al login
+        driver.navigate().to(URLCLIENT);
+
+        //Rellenamos el formulario de login
+        WebElement email2 = driver.findElement(By.name("email"));
+        email2.click();
+        email2.clear();
+        email2.sendKeys("user01@email.com");
+        WebElement password2 = driver.findElement(By.name("password"));
+        password2.click();
+        password2.clear();
+        password2.sendKeys("123456");
+
+        //Le damos click al boton de login
+        PO_View.checkElementBy(driver,"free","/html/body/div/div/div[3]/div/button").get(0).click();
+
+      // Le damos click al boton conversations
+        driver.findElement(By.xpath("/html/body/div/div/button[2]")).click();
+
+        //Comprobamos que hay una conversacion
+        String checkOwner = "user02@email.com";
+        String checkTitle = "offer1User2";
+
+        SeleniumUtils.textIsPresentOnPage(driver,checkTitle);
+        SeleniumUtils.textIsPresentOnPage(driver,checkOwner);
+
+
     }
 
     /**
