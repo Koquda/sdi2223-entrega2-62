@@ -64,7 +64,6 @@ module.exports = function(app, offersRepository, usersRepository) {
                 "&messageType=alert-danger");
         })
     });
-
     app.get("/offers/delete/:id", function (req, res) {
         let offerId = ObjectId(req.params.id);
         let filter = {_id: ObjectId(req.params.id)};
@@ -203,8 +202,6 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("Se ha producido un error al listar las ofertas " + error);
         });
     });
-
-
     app.get('/offers/buy/:id', function (req, res) {
         let offerId = ObjectId(req.params.id);
         let shop = {
@@ -291,7 +288,6 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("An error occurred while searching the offer" + error);
         });
     });
-
     app.get('/purchases', function (req, res) {
         let filter = {user: req.session.user};
         let options = {projection: {_id: 0, offerId: 1}};
@@ -330,7 +326,6 @@ module.exports = function(app, offersRepository, usersRepository) {
             res.send("Error occurred when obtaining your purchases: " + error);
         });
     });
-
     app.get('/offers/highlight/:id', function (req, res) {
 
         usersRepository.findUser({email:req.session.user},{}).then(user => {

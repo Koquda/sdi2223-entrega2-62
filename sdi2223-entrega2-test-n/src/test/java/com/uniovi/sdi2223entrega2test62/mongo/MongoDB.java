@@ -244,4 +244,42 @@ public class MongoDB {
 
     }
 
+    public String insertMessages(String user) {
+        MongoCollection<Document> ofertas = getMongodb().getCollection("offers");
+        MongoCollection<Document> conversations = getMongodb().getCollection("conversations");
+
+        Document offer = ofertas.find().first();
+
+        Document message = new Document()
+                .append("userID", "user02@email.com")
+                .append("ownerID", user)
+                .append("offerID", offer.get("_id").toString())
+                .append("message", "Esto en un mensaje")
+                .append("date", "6/5/2023, 14:12:44")
+                .append("read", false)
+                .append("sentBy", user)
+                .append("offerTitle", offer.get("title"));
+        conversations.insertOne(message);
+
+        Document message2 = new Document()
+                .append("userID", "user02@email.com")
+                .append("ownerID", user)
+                .append("offerID", offer.get("_id").toString())
+                .append("message", "Esto en un mensaje 2")
+                .append("date", "7/5/2023, 15:12:44")
+                .append("read", false)
+                .append("sentBy", user)
+                .append("offerTitle", offer.get("title"));
+        conversations.insertOne(message2);
+
+
+        return offer.get("_id").toString();
+    }
+
+    public String getFirstConversation() {
+        MongoCollection<Document> conversations = getMongodb().getCollection("conversations");
+        Document conversation = conversations.find().first();
+
+        return conversation.get("_id").toString();
+    }
 }

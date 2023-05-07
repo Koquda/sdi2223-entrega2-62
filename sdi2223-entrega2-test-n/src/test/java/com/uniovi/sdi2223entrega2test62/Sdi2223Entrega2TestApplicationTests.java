@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-   // static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
-    // static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
-  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
+    static String Geckodriver = "C:\\\\Users\\\\UO282874\\\\OneDrive - Universidad de Oviedo\\\\3º\\\\SDI\\\\Lab\\\\Sesion4\\\\PL-SDI-Sesión5-material\\\\PL-SDI-Sesio╠ün5-material\\\\geckodriver-v0.30.0-win64.exe";
+//     static String Geckodriver = "C:\\Users\\dani\\Downloads\\geckodriver-v0.30.0-win64\\geckodriver.exe";
+//  static String Geckodriver = "C:\\Users\\sergi\\OneDrive\\Escritorio\\3º 2CUATRIMESTRE\\SDI\\Sesion 6\\PL-SDI-Sesión5-material\\geckodriver-v0.30.0-win64.exe";
 
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
@@ -384,6 +384,36 @@ class Sdi2223Entrega2TestApplicationTests {
         SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
         checkText = "user03@email.com";
         SeleniumUtils.textIsNotPresentOnPage(driver,checkText);
+    }
+
+    /**
+     * [Prueba15] Intentar borrar el usuario que se encuentra en sesión y comprobar que no ha sido borrado
+     * (porque no es un usuario administrador o bien, porque, no se puede borrar a sí mismo, si está
+     * autenticado).
+     */
+    @Test
+    @Order(15)
+    public void PR15() {
+        //Vamos al formulario de login
+        PO_HomeView.clickOption(driver, "/users/login", "free", "//*[@id=\"myNavbar\"]/ul[2]/li[1]/a");
+        //Rellenamos el formulario de login con datos válidos (usuario administrador).
+        PO_LoginView.fillLoginForm(driver,"admin@email.com","admin");
+
+        //Comprobamos que entramos a la vista:“listado de usuarios”
+        String checkText = "List of Users";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+
+
+        // Clicar en la casilla del usuario
+        PO_View.checkElementBy(driver,"free", "/html/body/div/form/div[1]/table/tbody/tr["+ 1 +"]/td[1]/input").get(0).click();
+
+        // Clicar en borrar
+        PO_View.checkElementBy(driver,"free", "//*[@id=\"deleteButton\"]").get(0).click();
+
+        //Comprobamos que no  se borra
+        checkText = "admin@email.com";
+        SeleniumUtils.textIsPresentOnPage(driver,checkText);
     }
 
     /**
@@ -965,8 +995,9 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(34)
     public void PR34() {
+        // TODO mirar si esta bien
         //Accedemos a la url
-        driver.get("http://localhost:8080/api/offers/conversations");
+        driver.get("http://localhost:8080/apiclient/client.html");
 
         //Comprobamos que se nos redirije a la pagina del login
         String checkText = "Log In";
@@ -1038,10 +1069,11 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_View.checkElementBy(driver,"free","/html/body/div/form/button").get(0).click();
 
         //Comprobamos que solo esta presente el log relativo a el borrado de estos
-        SeleniumUtils.textIsPresentOnPage(driver, "/log/list GET {}");
-
         List<WebElement> peticion = PO_View.checkElementBy(driver,"free","//*[@id=\"tableLogs\"]/tbody/tr");
         Assertions.assertEquals(1,peticion.size());
+
+        SeleniumUtils.textIsPresentOnPage(driver, "/log/list GET {}");
+
     }
 
 
@@ -1174,7 +1206,6 @@ class Sdi2223Entrega2TestApplicationTests {
 
         //8. Preparamos la peticion de mensajes
         final String RestMessageAssuredURL = "http://localhost:8080/api/offers/" + offerId + "/messages";
-        System.out.println(RestMessageAssuredURL);
         request = RestAssured.given();
         requestParams = new JSONObject();
         requestParams.put("message", "Esto es un mensaje nuevo");
@@ -1190,12 +1221,252 @@ class Sdi2223Entrega2TestApplicationTests {
         System.out.println(RestMessageAssuredURL);
         request = RestAssured.given();
         request.header("token", token);
-        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        //11. Hacemos la petición y comprobamos que devuelve 200 y size == 1
         response = request.get(RestGetMessageAssuredURL);
         Assertions.assertEquals(200, response.getStatusCode());
         body = response.body();
         List<String> messages = body.path("messages");
         Assertions.assertEquals(1, messages.size());
+    }
+
+    // [Prueba43] Enviar un primer mensaje una oferta propia y comprobar que no se inicia la conversación.
+    // En este caso de prueba, el propietario de la oferta tendrá que identificarse (S1), enviar un mensaje
+    // para una oferta propia (S3) y comprobar que el mensaje no se almacena (S4)
+    @Test
+    @Order(43)
+    public void PR43() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+
+        //5. Preparamos la peticion de ofertas
+        final String RestOffersAssuredURL = "http://localhost:8080/api/myOffers";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200
+        response = request.get(RestOffersAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        // 7. Obtenemos las ofertas
+        body = response.body();
+        HashMap offer = body.path("offers[1]");
+        String offerId = offer.get("_id").toString();
+
+        //8. Preparamos la peticion de mensajes
+        final String RestMessageAssuredURL = "http://localhost:8080/api/offers/" + offerId + "/messages";
+        System.out.println(RestMessageAssuredURL);
+        request = RestAssured.given();
+        requestParams = new JSONObject();
+        requestParams.put("message", "Esto es un mensaje nuevo");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        request.header("token", token);
+        //9. Hacemos la petición y comprobamos que devuelve 403
+        response = request.post(RestMessageAssuredURL);
+        Assertions.assertEquals(403, response.getStatusCode());
+
+        //10. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/" + offerId + "/conversation";
+        request = RestAssured.given();
+        request.header("token", token);
+        //11. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        List<String> messages = body.path("messages");
+        //12. Comprobamos que no existe el mensaje
+        Assertions.assertEquals(0, messages.size());
+    }
+
+    // [Prueba44] Obtener los mensajes de una conversación. Esta prueba consistirá en comprobar que el
+    // servicio retorna el número correcto de mensajes para una conversación. El ID de la conversación
+    // deberá conocerse a priori. Por lo tanto, se tendrá primero que invocar al servicio de identificación
+    // (S1), y solicitar el listado de mensajes de una conversación de id conocido a continuación (S4),
+    // comprobando que se retornan los mensajes adecuados.
+    @Test
+    @Order(44)
+    public void PR44() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        String user = "user01@email.com";
+        requestParams.put("email", user);
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+        // Insertamos los mensajes y obtenemos el id de la oferta de la conversacion
+        String offerID = mongoDB.insertMessages(user);
+
+        //5. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/" + offerID + "/conversation";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        List<String> messages = body.path("messages");
+        //7. Comprobamos que no existe el mensaje
+        Assertions.assertEquals(2, messages.size());
+    }
+
+    // [Prueba45] Obtener la lista de conversaciones de un usuario. Esta prueba consistirá en comprobar que
+    // el servicio retorna el número correcto de conversaciones para dicho usuario. Por lo tanto, se tendrá
+    // primero que invocar al servicio de identificación (S1), y solicitar el listado de conversaciones a
+    // continuación (S5) comprobando que se retornan las conversaciones adecuadas
+    @Test
+    @Order(45)
+    public void PR45() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        String user = "user01@email.com";
+        requestParams.put("email", user);
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+        // Insertamos los mensajes y obtenemos el id de la oferta de la conversacion
+        String offerID = mongoDB.insertMessages(user);
+
+        //5. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/conversations";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        List<String> conversations = body.path("conversations");
+        //7. Comprobamos que exite la conversacion
+        Assertions.assertEquals(1, conversations.size());
+    }
+
+    // [Prueba46] Eliminar una conversación de ID conocido. Esta prueba consistirá en comprobar que se
+    // elimina correctamente una conversación concreta. Por lo tanto, se tendrá primero que invocar al
+    // servicio de identificación (S1), eliminar la conversación ID (S6) y solicitar el listado de
+    // conversaciones a continuación (S5), comprobando que se retornan las conversaciones adecuadas.
+    @Test
+    @Order(46)
+    public void PR46() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        String user = "user01@email.com";
+        requestParams.put("email", user);
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+        // Insertamos los mensajes y obtenemos el id de la oferta de la conversacion
+        String offerID = mongoDB.insertMessages(user);
+        String conversationId = mongoDB.getFirstConversation();
+
+        //5. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestConversationsAssuredURL = "http://localhost:8080/api/offers/conversation/delete/" + conversationId;
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.delete(RestConversationsAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        Assertions.assertEquals("{\"message\":\"Conversation removed\"}", response.body().asString());
+
+        //7. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/conversations";
+        request = RestAssured.given();
+        request.header("token", token);
+        //8. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        List<String> conversations = body.path("conversations");
+        //9. Comprobamos que no existe el mensaje
+        Assertions.assertEquals(0, conversations.size());
+    }
+
+    // [Prueba47] Marcar como leído un mensaje de ID conocido. Esta prueba consistirá en comprobar que
+    // el mensaje marcado de ID conocido queda marcado correctamente a true como leído. Por lo
+    // tanto, se tendrá primero que invocar al servicio de identificación (S1), solicitar el servicio de
+    // marcado (S7), comprobando que el mensaje marcado ha quedado marcado a true como leído (S4).
+    @Test
+    @Order(47)
+    public void PR47() {
+        final String RestLoginAssuredURL = "http://localhost:8080/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        String user = "user01@email.com";
+        requestParams.put("email", user);
+        requestParams.put("password", "123456");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición y comprobamos que devuelve 200
+        Response response = request.post(RestLoginAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        //4. Obtenemos el token de autorización
+        ResponseBody body = response.body();
+        String token = body.path("token");
+
+        // Insertamos los mensajes y obtenemos el id de la oferta de la conversacion
+        mongoDB.insertMessages(user);
+        String conversationId = mongoDB.getFirstConversation();
+
+        //5. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestReadAssuredURL = "http://localhost:8080/api/offers/" + conversationId + "/markRead";
+        request = RestAssured.given();
+        request.header("Content-Type", "application/json");
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.post(RestReadAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+
+        body = response.body();
+        String offerID = body.path("offerId");
+
+        //7. Preparamos la peticion de conversaciones para obtener el mensaje
+        final String RestGetMessageAssuredURL = "http://localhost:8080/api/offers/" + offerID + "/conversation";
+        request = RestAssured.given();
+        request.header("token", token);
+        //6. Hacemos la petición y comprobamos que devuelve 200 y size == 1
+        response = request.get(RestGetMessageAssuredURL);
+        Assertions.assertEquals(200, response.getStatusCode());
+        body = response.body();
+        HashMap messages = body.path("messages[0]");
+        //7. Comprobamos que no existe el mensaje
+        Assertions.assertEquals(true, messages.get("read"));
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -1208,8 +1479,9 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(48)
     public void PR48() {
-        driverClient.navigate().to(URLCLIENT);
-        mongoDB.resetMongo();
+      //  driverClient.navigate().to(URLCLIENT);
+        driver.get(URLCLIENT);
+//        mongoDB.resetMongo();
 
        //Rellenamos el formulario de login de un usuario
         WebElement email = driver.findElement(By.name("email"));
